@@ -1,0 +1,14 @@
+{
+  "maxWorkers": 1,
+  "testTimeout": 120000,
+  "testEnvironment": "./environment",
+  "verbose": true,
+  "bail": false,
+  "reporters": ["detox/runners/jest/reporter"],
+  "globalSetup": "detox/runners/jest/globalSetup",
+  "globalTeardown": "detox/runners/jest/globalTeardown",
+  "testMatch": ["**/__tests__/e2e/**/*.e2e.test.[jt]s"],
+  "transform": {
+    "^.+\\.(js|ts)$": "babel-jest"
+  }
+}
