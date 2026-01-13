@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.database import init_db, close_db
-from app.api.v1 import auth, users, vehicles
+from app.api.v1 import auth, users, vehicles, diagnostics, payments
 
 
 @asynccontextmanager
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="RPP Auto - AI-Powered Vehicle Diagnostics Platform",
+    description="RPP Auto - AI-Powered Vehicle Diagnostics Platform API",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan
@@ -39,6 +39,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(vehicles.router, prefix="/api/v1/vehicles", tags=["Vehicles"])
+app.include_router(diagnostics.router, prefix="/api/v1/diagnostics", tags=["Diagnostics"])
+app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments & Subscriptions"])
 
 
 @app.get("/")
@@ -46,10 +48,11 @@ async def root():
     return {
         "message": "RPP Auto API",
         "version": settings.APP_VERSION,
+        "status": "running",
         "docs": "/docs"
     }
 
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "version": settings.APP_VERSION}
