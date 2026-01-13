@@ -1,0 +1,87 @@
+name: Deploy to Ionos Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Ionos
+      env:
+        SSH_HOST: ${{ secrets.IONOS_SSH_HOST }}
+        SSH_USER: ${{ secrets.IONOS_SSH_USER }}
+        SSH_KEY: ${{ secrets.IONOS_SSH_KEY }}
+        SSH_PORT: ${{ secrets.IONOS_SSH_PORT }}
+      run: |
+        # Setup SSH
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -p ${SSH_PORT:-22} $SSH_HOST >> ~/.ssh/known_hosts
+
+        # Deploy
+        ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22} $SSH_USER@$SSH_HOST << 'ENDSSH'
+          set -e
+
+          echo "🚀 Starting deployment to Ionos..."
+
+          # Navigate to project directory
+          cd /var/www/RPP-Auto-Mobile-App || { echo "❌ Project directory not found"; exit 1; }
+
+          # Pull latest code
+          echo "📥 Pulling latest code..."
+          git pull origin main
+
+          # Check if Docker is running
+          if ! docker ps &> /dev/null; then
+            echo "❌ Docker is not running"
+            exit 1
+          fi
+
+          # Stop existing container
+          echo "🛑 Stopping existing container..."
+          docker stop rpp-auto-api 2>/dev/null || true
+          docker rm rpp-auto-api 2>/dev/null || true
+
+          # Build new image
+          echo "🔨 Building Docker image..."
+          docker build -t rpp-auto-backend .
+
+          # Start new container
+          echo "▶️  Starting new container..."
+          docker run -d \
+            --name rpp-auto-api \
+            -p 8000:8000 \
+            --env-file .env \
+            --restart unless-stopped \
+            rpp-auto-backend
+
+          # Wait for container to be healthy
+          echo "⏳ Waiting for container to start..."
+          sleep 5
+
+          # Check if container is running
+          if docker ps | grep -q rpp-auto-api; then
+            echo "✅ Deployment successful!"
+            echo "📊 Container status:"
+            docker ps | grep rpp-auto-api
+          else
+            echo "❌ Deployment failed - container not running"
+            echo "📋 Container logs:"
+            docker logs rpp-auto-api
+            exit 1
+          fi
+
+          # Clean up old images
+          echo "🧹 Cleaning up old images..."
+          docker image prune -f
+
+          echo "🎉 Deployment completed successfully!"
+        ENDSSH
