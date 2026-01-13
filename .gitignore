@@ -1,66 +1,24 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+# OSX
+.DS_Store
 
-# Virtual Environment
-venv/
-ENV/
-env/
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
 
-# Environment variables
+# React Native
+/android/app/build
+/android/.gradle
+/ios/Pods/
+/ios/build
+
+# Environment
 .env
 .env.local
-.env.*.local
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-*.cover
-
-# Logs
-*.log
-logs/
-
-# Database
-*.db
-*.sqlite3
-
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
-
-# Alembic
-alembic/versions/*.pyc
-
-# Firebase
-firebase-credentials.json
-*.json
-!alembic.ini
+# Test
+coverage/
