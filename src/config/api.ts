@@ -1,0 +1,22 @@
+import {
+  MOTOR_DAAS_PUBLIC_KEY,
+  MOTOR_DAAS_PRIVATE_KEY,
+  AUTO_DEV_API_KEY,
+  GOOGLE_MAPS_API_KEY,
+  OPENROUTER_API_KEY,
+  STRIPE_PUBLISHABLE_KEY,
+} from '@env';
+
+export const API_CONFIG = {
+  MOTOR_DAAS_PUBLIC_KEY,
+  MOTOR_DAAS_PRIVATE_KEY,
+  AUTO_DEV_API_KEY,
+  GOOGLE_MAPS_API_KEY,
+  OPENROUTER_API_KEY,
+  STRIPE_PUBLISHABLE_KEY,
+
+  // API Base URLs
+  MOTOR_DAAS_BASE_URL: 'https://api.motor-data.com/api/v1',
+  AUTO_DEV_BASE_URL: 'https://auto.dev/api/vin',
+  OPENROUTER_BASE_URL: 'https://openrouter.ai/api/v1',
+};
