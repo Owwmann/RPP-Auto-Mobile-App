@@ -1,5 +1,66 @@
 {
-  "name": "RPPAuto",
-  "displayName": "RPP Auto",
-  "description": "AI-powered vehicle diagnostics and maintenance assistant"
+  "expo": {
+    "name": "RPP Auto",
+    "slug": "rpp-auto-mobile-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/screens/01---splash-screen.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/screens/01---splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.recessionproofproducts.rppauto"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/screens/01---splash-screen.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.recessionproofproducts.rppauto",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/screens/01---splash-screen.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow RPP Auto to access your camera for vehicle diagnostics."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location to find nearby mechanics."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "rpp-auto-mobile-app"
+      }
+    },
+    "owner": "owwmann",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/rpp-auto-mobile-app"
+    }
+  }
 }
