@@ -1,0 +1,45 @@
+name: Build Android APK
+'on':
+  workflow_dispatch: {}
+  push:
+    branches:
+    - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: npm
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+    - name: Install dependencies
+      run: npm ci
+    - name: Make Gradlew executable
+      run: cd android && chmod +x gradlew
+    - name: Build Android APK
+      run: cd android && ./gradlew assembleRelease
+    - name: Build Android AAB
+      run: cd android && ./gradlew bundleRelease
+      continue-on-error: true
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: rpp-auto-release-apk
+        path: android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
+    - name: Upload AAB
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: rpp-auto-release-aab
+        path: android/app/build/outputs/bundle/release/app-release.aab
+        retention-days: 30
+      continue-on-error: true
