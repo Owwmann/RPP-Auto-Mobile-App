@@ -34,12 +34,6 @@
     },
     "plugins": [
       [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow RPP Auto to access your camera for vehicle diagnostics."
-        }
-      ],
-      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location for nearby service centers."
