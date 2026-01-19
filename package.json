@@ -15,6 +15,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.73.2",
+    "expo": "^50.0.0",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/stack": "^6.3.20",
