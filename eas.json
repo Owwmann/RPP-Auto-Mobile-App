@@ -1,29 +1,11 @@
 {
   "cli": {
-    "version": ">= 5.0.0"
+    "version": ">= 7.0.0"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
-    },
     "production": {
       "android": {
         "buildType": "app-bundle"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "../path/to/api-key.json",
-        "track": "internal"
       }
     }
   }
