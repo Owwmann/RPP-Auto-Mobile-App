@@ -1,0 +1,63 @@
+name: Build Android AAB (EAS)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  eas-build-android:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install jq and curl
+        run: sudo apt-get update && sudo apt-get install -y jq curl
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Login to Expo
+        run: |
+          set -e
+          export EXPO_TOKEN="${{ secrets.EXPO_TOKEN }}"
+          eas whoami || eas login --token "$EXPO_TOKEN"
+
+      - name: Start EAS build (production AAB)
+        id: start_build
+        run: |
+          set -e
+          # Start build and capture JSON output (contains build id)
+          eas build --platform android --profile production --non-interactive --json > build.json
+          cat build.json
+          BUILD_ID=$(jq -r '.id' build.json)
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for build to finish
+        run: |
+          set -e
+          BUILD_ID=${{ steps.start_build.outputs.BUILD_ID }}
+          echo "Waiting for build $BUILD_ID to finish..."
+          # Poll build status until finished or errored (timeout after ~30 min)
+          for i in $(seq 1 60); do
+            STATUS=$(eas build:view --json "$BUILD_ID" | jq -r '.status')
+            echo "Attempt $i: status=$STATUS"
+            if [ "$STATUS" = "finished" ]; then
+              break
+            fi
+            if [ "$STATUS" = "errored" ]; then
+              echo "Build errored. Exiting."
+              eas build:view --json "$BUILD_ID" | jq .
+              exit 1
+            fi
+            sleep 30
+          done
