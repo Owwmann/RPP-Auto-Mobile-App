@@ -24,7 +24,8 @@
     "react-native-maps": "^1.10.3",
     "axios": "^1.6.5",
     "react-native-vector-icons": "^10.0.3",
-    "react-native-dotenv": "^3.4.10"
+    "react-native-dotenv": "^3.4.10",
+    "expo-camera": "~13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
