@@ -1,13 +1,13 @@
 {
   "expo": {
     "name": "RPP Auto",
-    "slug": "rpp-auto-mobile-app",
+    "slug": "rpp-auto-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/screens/01---splash-screen.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/screens/01---splash-screen.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,25 +16,21 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.recessionproofproducts.rppauto"
+      "bundleIdentifier": "com.rppautomobile.app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/screens/01---splash-screen.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.recessionproofproducts.rppauto",
+      "package": "com.rppautomobile.app",
       "permissions": [
         "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
         "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
         "BLUETOOTH",
         "BLUETOOTH_ADMIN"
       ]
-    },
-    "web": {
-      "favicon": "./assets/images/screens/01---splash-screen.png"
     },
     "plugins": [
       [
@@ -46,21 +42,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location to find nearby mechanics."
+          "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location for nearby service centers."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "rpp-auto-mobile-app"
-      }
-    },
-    "owner": "owwmann",
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/rpp-auto-mobile-app"
-    }
+    ]
   }
 }
