@@ -41,7 +41,7 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: 📦 Install dependencies
         run: npm install --legacy-peer-deps
@@ -56,7 +56,7 @@ jobs:
         run: |
           eas build --platform android \
             --profile ${{ github.event.inputs.profile || 'production' }} \
-            --non-interactive \
+            # --non-interactive removed for initial keystore generation \
             --no-wait
       
       - name: 📊 Get Build Status
