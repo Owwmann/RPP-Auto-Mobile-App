@@ -1,0 +1,85 @@
+name: EAS Build - Android (Managed Workflow)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile to use'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+      auto_submit:
+        description: 'Auto-submit to Play Store (production only)'
+        required: false
+        default: 'false'
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - 'package.json'
+      - 'eas.json'
+      - 'app.json'
+
+jobs:
+  build:
+    name: Build Android App (Cloud)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔍 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 📦 Install dependencies
+        run: npm ci
+      
+      - name: 🔐 Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: 🚀 Run EAS Build (Managed - Cloud Generation)
+        run: |
+          eas build --platform android \
+            --profile ${{ github.event.inputs.profile || 'production' }} \
+            --non-interactive \
+            --no-wait
+      
+      - name: 📊 Get Build Status
+        id: build-status
+        run: |
+          echo "Getting latest build status..."
+          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Build ID: $BUILD_ID"
+      
+      - name: 📤 Submit to Play Store
+        if: ${{ github.event.inputs.auto_submit == 'true' && github.event.inputs.profile == 'production' }}
+        run: eas submit --platform android --latest --non-interactive
+      
+      - name: 📋 Build Summary
+        run: |
+          echo "## 🎉 Build Initiated Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Profile:** ${{ github.event.inputs.profile || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Platform:** Android" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Type:** ${{ github.event.inputs.profile == 'production' && 'AAB (Play Store)' || 'APK (Testing)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Monitor build:** [Expo Dashboard](https://expo.dev)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Note:** Native android/ folder generated automatically in the cloud (Continuous Native Generation)" >> $GITHUB_STEP_SUMMARY
