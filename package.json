@@ -26,7 +26,8 @@
     "react-native-vector-icons": "^10.0.3",
     "react-native-dotenv": "^3.4.10",
     "react-native-vision-camera": "^3.6.0",
-    "@react-native-community/geolocation": "^3.0.6"
+    "@react-native-community/geolocation": "^3.0.6",
+    "expo-camera": "~13.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
