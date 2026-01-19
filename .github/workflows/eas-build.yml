@@ -1,4 +1,4 @@
-name: EAS Build - Android (Managed Workflow)
+name: EAS Build - Android (Self-Provisioning)
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ on:
 
 jobs:
   build:
-    name: Build Android App (Cloud)
+    name: Build Android App (Self-Provisioning)
     runs-on: ubuntu-latest
     
     steps:
@@ -43,6 +43,12 @@ jobs:
         with:
           node-version: '20'
       
+      - name: ☕ Setup Java (for keytool)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
       - name: 📦 Install dependencies
         run: npm install --legacy-peer-deps
       
@@ -52,11 +58,39 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       
-      - name: 🚀 Run EAS Build (Managed - Cloud Generation)
+      - name: 🔑 Generate Android Keystore
+        run: |
+          echo "📝 Generating production keystore..."
+          keytool -genkeypair -v \
+            -keystore production.jks \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -alias rpp_alias \
+            -storepass password123 \
+            -keypass password123 \
+            -dname "CN=RPP Auto, OU=Mobile, O=RPP, L=USA, C=US"
+          echo "✅ Keystore generated successfully"
+          ls -lh production.jks
+      
+      - name: ⬆️ Upload Keystore to Expo
+        run: |
+          echo "📤 Uploading keystore credentials to Expo..."
+          npx eas-cli credentials:create \
+            --platform android \
+            --type keystore \
+            --keystore-path production.jks \
+            --keystore-password password123 \
+            --key-alias rpp_alias \
+            --key-password password123 \
+            --non-interactive
+          echo "✅ Keystore credentials uploaded"
+      
+      - name: 🚀 Run EAS Build (Non-Interactive)
         run: |
           eas build --platform android \
             --profile ${{ github.event.inputs.profile || 'production' }} \
-            # --non-interactive removed for initial keystore generation \
+            --non-interactive \
             --no-wait
       
       - name: 📊 Get Build Status
@@ -81,8 +115,9 @@ jobs:
           echo "**Profile:** ${{ github.event.inputs.profile || 'production' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Platform:** Android" >> $GITHUB_STEP_SUMMARY
           echo "**Build Type:** ${{ github.event.inputs.profile == 'production' && 'AAB (Play Store)' || 'APK (Testing)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Keystore:** Auto-generated and uploaded ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **Monitor build:** [Expo Dashboard](https://expo.dev)" >> $GITHUB_STEP_SUMMARY
           echo "🎯 **Build ID:** ${{ steps.build-status.outputs.build_id }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Note:** Native android/ folder generated automatically in the cloud (Continuous Native Generation)" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Note:** Fully automated self-provisioning pipeline - no manual keystore setup needed!" >> $GITHUB_STEP_SUMMARY
