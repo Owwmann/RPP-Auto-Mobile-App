@@ -1,34 +1,34 @@
 name: Build Android APK with EAS
-'on':
+on:
   workflow_dispatch: {}
   push:
     branches:
-    - main
+      - main
+
 jobs:
   build:
+    name: Install and Build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
-    
-    - name: Install EAS CLI
-      run: npm install -g eas-cli
-    
-    - name: Build with EAS
-      run: eas build --platform android --profile preview --non-interactive --no-wait
-      env:
-        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-    
-    - name: Check build status
-      run: |
-        echo "Build submitted to EAS!"
-        echo "Check your build status at: https://expo.dev"
-        echo "You'll receive an email when the build completes."
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # CACHE REMOVED intentionally to fix "lock file" errors
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Build with EAS
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Report Status
+        run: echo "Build submitted to Expo. Check dashboard for APK."
