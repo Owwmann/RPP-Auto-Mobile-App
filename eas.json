@@ -10,21 +10,21 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug"
       },
-      "node": "20.18.0"
+      "node": "22.11.0"
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       },
-      "node": "20.18.0"
+      "node": "22.11.0"
     },
     "production": {
       "android": {
         "buildType": "apk",
         "credentialsSource": "remote"
       },
-      "node": "20.18.0"
+      "node": "22.11.0"
     }
   },
   "submit": {
