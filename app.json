@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RPP Auto",
-    "slug": "rpp-auto-mobile-app",
+    "slug": "rpp-auto",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
