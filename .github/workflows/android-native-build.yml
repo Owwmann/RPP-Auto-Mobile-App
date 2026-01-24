@@ -44,8 +44,21 @@ jobs:
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/icon.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/adaptive-icon.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/splash.png
-          # Run prebuild (this creates the debug keystore automatically)
-          npx expo prebuild --platform android --clean --no-install
+
+          # CRITICAL: Remove any existing broken android folder
+          rm -rf android
+
+          # Run clean prebuild
+          npx expo prebuild --platform android --clean
+
+          # Verify android folder was created
+          if [ ! -d "android" ]; then
+            echo "❌ ERROR: android folder was not created by expo prebuild!"
+            exit 1
+          fi
+
+          echo "✅ Android project generated successfully"
+          ls -la android/
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
