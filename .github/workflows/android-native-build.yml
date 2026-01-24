@@ -41,41 +41,36 @@ jobs:
         run: |
           # Create placeholder icons to avoid build errors
           mkdir -p assets
-          # Create a simple 1x1 transparent PNE (base64 encoded)
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/icon.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/adaptive-icon.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/splash.png
-          # Run prebuild
+          # Run prebuild (this creates the debug keystore automatically)
           npx expo prebuild --platform android --clean --no-install
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 🔑 Generate Debug Keystore
-        run: |
-          # Create debug keystore for signing
-          mkdir -p android/app
-          keytool -genkeypair -v -storetype PKCS12 \
-            -keystore android/app/debug.keystore \
-            -alias androiddebugkey \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass android -keypass android \
-            -dname "CN=Android Debug,O=Android,C=US"
-
-      - name: 🏗️ Build Android APK Locally
+      - name: 🏗️ Build Android APK with Gradle
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --stacktrace
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        timeout-minutes: 30
 
       - name: 📋 Find APK
         run: |
-          # Find the generated APK
+          echo "Searching for APK files..."
           find android -name "*.apk" -type f
           # Copy to root for upload
-          cp android/app/build/outputs/apk/release/app-release.apk ./app-release.apk || \
-          cp android/app/build/outputs/apk/release/*.apk ./app-release.apk
+          APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)
+          if [ -n "$APK_PATH" ]; then
+            cp "$APK_PATH" ./app-release.apk
+            echo "✅ APK found and copied: $APK_PATH"
+          else
+            echo "❌ No APK found!"
+            exit 1
+          fi
 
       - name: 📤 Upload APK Artifact
         if: success()
