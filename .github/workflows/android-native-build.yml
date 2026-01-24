@@ -27,7 +27,10 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: 📦 Install Dependencies
-        run: npm install --no-package-lock --legacy-peer-deps
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --legacy-peer-deps
+          npm list expo-camera expo-location
 
       - name: 🌍 Install EAS CLI
         run: npm install -g eas-cli
