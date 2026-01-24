@@ -13,9 +13,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "18.3.1",
+    "react": "18.2.0",
     "react-native": "0.73.9",
-    "expo": "~49.0.0",
+    "expo": "~50.0.0",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/stack": "^6.3.20",
@@ -42,6 +42,6 @@
     "typescript": "^5.3.3",
     "@testing-library/react-native": "^12.4.3",
     "@react-native/eslint-config": "^0.73.1",
-    "react-test-renderer": "18.3.1"
+    "react-test-renderer": "18.2.0"
   }
 }
