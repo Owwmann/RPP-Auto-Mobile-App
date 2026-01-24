@@ -22,7 +22,6 @@
     "@supabase/supabase-js": "^2.39.3",
     "@stripe/stripe-react-native": "^0.35.1",
     "react-native-ble-plx": "^3.1.2",
-    "react-native-maps": "^1.10.3",
     "axios": "^1.6.5",
     "react-native-vector-icons": "^10.0.3",
     "react-native-dotenv": "^3.4.10",
