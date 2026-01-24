@@ -24,7 +24,7 @@ jobs:
           java-version: '17'
 
       - name: 📦 Install Dependencies
-        run: npm install
+        run: npm install --no-package-lock --legacy-peer-deps
 
       - name: 🌍 Install EAS CLI
         run: npm install -g eas-cli
