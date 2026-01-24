@@ -30,7 +30,6 @@ jobs:
         run: |
           rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
-          npm list expo-camera expo-location
 
       - name: 🌍 Install EAS CLI
         run: npm install -g eas-cli
