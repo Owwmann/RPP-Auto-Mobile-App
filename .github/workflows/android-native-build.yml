@@ -1,0 +1,55 @@
+name: Native Android Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📱 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 🌍 Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: ⚙️ Configure Expo
+        run: eas build:configure --platform android --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🏗️ Build Android APK Locally
+        run: eas build --platform android --profile production --local --non-interactive --output=./app-release.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rpp-auto-release
+          path: app-release.apk
+
+      - name: ✅ Build Complete
+        run: |
+          echo "🎉 Build completed successfully!"
+          echo "📲 Download the APK from the Artifacts section above."
+          echo "⏱️ Build took: ${{ job.status }}"
