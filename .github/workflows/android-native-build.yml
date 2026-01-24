@@ -24,7 +24,7 @@ jobs:
           java-version: '17'
 
       - name: 📱 Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v2
 
       - name: 🌍 Install EAS CLI
         run: npm install -g eas-cli
