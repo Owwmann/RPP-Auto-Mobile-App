@@ -34,20 +34,7 @@
         "BLUETOOTH_SCAN"
       ]
     },
-    "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location for nearby service centers."
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow RPP AUTO to access your camera for VIN scanning and damage documentation."
-        }
-      ]
-    ],
+    "plugins": [],
     "extra": {
       "eas": {
         "projectId": "5b717878-92a2-43d4-ab24-93501737a6ae"
