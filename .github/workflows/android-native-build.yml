@@ -23,6 +23,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: 📦 Install Dependencies
         run: npm install --no-package-lock --legacy-peer-deps
 
@@ -31,6 +34,11 @@ jobs:
 
       - name: ⚙️ Authenticate with Expo
         run: eas whoami
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🔨 Prebuild Android Project
+        run: npx expo prebuild --platform android --clean
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
