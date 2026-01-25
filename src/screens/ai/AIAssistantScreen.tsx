@@ -12,7 +12,7 @@ interface Message {
 
 const AIAssistantScreen: React.FC = () => {
   const {user} = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Array<Message>>([
     {
       id: '1',
       text: 'Hello! I'm your RPP Auto AI Assistant. How can I help you today?',
@@ -95,7 +95,7 @@ const AIAssistantScreen: React.FC = () => {
         ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
-        keyExtractor={item => item.id}
+         keyExtractor={item => item.id}
         contentContainerStyle={styles.messageList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
       />
