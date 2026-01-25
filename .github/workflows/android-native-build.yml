@@ -39,7 +39,7 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 🔨 Prebuild Android Project
+      - name: 🔨 Prebuild Android Project (CLEAN + OPTIMIZED)
         run: |
           # Create placeholder icons to avoid build errors
           mkdir -p assets
@@ -47,10 +47,10 @@ jobs:
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/adaptive-icon.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > assets/splash.png
 
-          # CRITICAL: Remove any existing broken android folder
+          # FIX #2: FORCE CLEAN PREBUILD - Remove any existing broken android folder
           rm -rf android
 
-          # Run clean prebuild
+          # Run clean prebuild with updated babel.config.js
           npx expo prebuild --platform android --clean
 
           # Verify android folder was created
@@ -64,11 +64,17 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 🏗️ Build Android APK with Gradle
+      - name: 🔧 FIX #1: Grant Gradle Execution Rights
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleRelease --stacktrace
+          echo "✅ Gradle wrapper is now executable"
+
+      - name: 🏗️ FIX #3: Build Android APK with Optimized Gradle Args
+        run: |
+          cd android
+          # FIX #3: Use --no-daemon and --stacktrace for CI environment
+          ./gradlew assembleRelease --no-daemon --stacktrace
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         timeout-minutes: 30
