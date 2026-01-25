@@ -70,11 +70,17 @@ jobs:
           chmod +x ./gradlew
           echo "✅ Gradle wrapper is now executable"
 
+      - name: 🧹 FIX #6: Deep Clean Build Cache
+        run: |
+          cd android
+          ./gradlew clean
+          echo "✅ Gradle build cache cleaned"
+
       - name: 🏗️ FIX #3: Build Android APK with Optimized Gradle Args
         run: |
           cd android
           # FIX #3: Use --no-daemon and --stacktrace for CI environment
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         timeout-minutes: 30
@@ -84,9 +90,9 @@ jobs:
           echo "Searching for APK files..."
           find android -name "*.apk" -type f
           # Copy to root for upload
-          APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" -type f | head -1)
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" -type f | head -1)
           if [ -n "$APK_PATH" ]; then
-            cp "$APK_PATH" ./app-release.apk
+            cp "$APK_PATH" ./app-debug.apk
             echo "✅ APK found and copied: $APK_PATH"
           else
             echo "❌ No APK found!"
@@ -97,8 +103,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: rpp-auto-release
-          path: app-release.apk
+          name: rpp-auto-debug
+          path: app-debug.apk
           retention-days: 30
 
       - name: ✅ Build Complete
@@ -106,4 +112,4 @@ jobs:
         run: |
           echo "🎉 Build completed successfully!"
           echo "📲 Download the APK from the Artifacts section above."
-          ls -lh app-release.apk
+          ls -lh app-debug.apk
