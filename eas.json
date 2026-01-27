@@ -24,7 +24,7 @@
     "production": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
+        "buildType": "app-bundle",
         "gradleCommand": ":app:assembleRelease"
       },
       "node": "22.11.0"

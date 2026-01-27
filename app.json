@@ -34,7 +34,19 @@
         "BLUETOOTH_SCAN"
       ]
     },
-    "plugins": [],
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "networkInspector": false,
+            "usesCleartextTraffic": false,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "5b717878-92a2-43d4-ab24-93501737a6ae"

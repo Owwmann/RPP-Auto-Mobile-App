@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Production API with certificate pinning -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.rppautomobile.app</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <pin-set expiration="2027-01-27">
+            <!-- Replace with actual certificate hash -->
+            <pin digest="SHA-256">PLACEHOLDER_CERT_HASH_BASE64==</pin>
+            <pin digest="SHA-256">PLACEHOLDER_BACKUP_CERT_HASH==</pin>
+        </pin-set>
+    </domain-config>
+
+    <!-- Stripe API (trusted third-party) -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.stripe.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Supabase APIs -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">supabase.co</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Default: HTTPS only -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
