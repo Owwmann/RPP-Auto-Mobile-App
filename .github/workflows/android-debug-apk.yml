@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
 
     steps:
       - name: 📥 Checkout repository
@@ -20,57 +20,40 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🔧 Set up Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.11.0'
 
-      - name: 📦 Install Dependencies
+      - name: 📦 Install dependencies
         run: |
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🔨 Generate Gradle Wrapper
+      - name: 🏗️ Generate Android Native Project
         run: |
-          cd android
-          # Use Gradle to generate the wrapper if it doesn't exist
-          if [ ! -f "gradlew" ]; then
-            echo "🔧 Generating Gradle wrapper..."
-            gradle wrapper --gradle-version 8.3
-          fi
-          chmod +x gradlew
-          ls -la gradlew
+          echo "🔧 Running expo prebuild to generate android folder..."
+          npx expo prebuild --platform android --no-install
+
+          echo "✅ Verifying gradlew was generated..."
+          ls -la android/gradlew
+          chmod +x android/gradlew
 
       - name: 🏗️ Build Debug APK
         run: |
           cd android
           ./gradlew assembleDebug --stacktrace --info --no-daemon
+          echo "✅ Debug APK built successfully"
 
-      - name: 📋 Find and Copy APK
-        run: |
-          echo "🔍 Searching for APK files..."
-          find android -name "*.apk" -type f
-          
-          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -1)
-          
-          if [ -n "$APK_PATH" ]; then
-            cp "$APK_PATH" ./rpp-auto-debug.apk
-            echo "✅ APK found: $APK_PATH"
-            ls -lh ./rpp-auto-debug.apk
-          else
-            echo "❌ No APK found!"
-            exit 1
-          fi
-
-      - name: 📤 Upload APK Artifact
+      - name: 📦 Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: rpp-auto-debug-apk
-          path: rpp-auto-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      - name: ✅ Build Complete
+      - name: 🎉 Build Summary
         run: |
-          echo "🎉 Build completed successfully!"
-          echo "📲 Download the APK from the Artifacts section above."
-          ls -lh rpp-auto-debug.apk
+          echo "🎉 Debug APK built successfully!"
+          echo "📲 Download from Artifacts section above"
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
