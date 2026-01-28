@@ -30,10 +30,14 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
+      - name: 🏗️ Generate Android Project
+        run: |
+          npx expo prebuild --platform android
+          chmod +x android/gradlew
+
       - name: 🏗️ Build Debug APK
         run: |
           cd android
-          chmod +x ./gradlew
           ./gradlew assembleDebug --stacktrace --info --no-daemon
           echo "✅ Debug APK built successfully"
 
