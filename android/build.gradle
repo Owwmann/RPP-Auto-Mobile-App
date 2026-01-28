@@ -3,13 +3,11 @@
 buildscript {
     ext {
         buildToolsVersion = "34.0.0"
-        minSdkVersion = 23
+        minSdkVersion = 24
         compileSdkVersion = 34
         targetSdkVersion = 34
-        ndkVersion = "26.1.10909125"
-
-        // Explicitly set Kotlin version for Gradle 8+ compatibility
-        kotlinVersion = "1.9.23"
+        ndkVersion = "25.1.8937393"
+        kotlinVersion = "1.8.0"
     }
     repositories {
         google()
@@ -22,7 +20,7 @@ buildscript {
     }
 }
 
-// 🔥 CRITICAL FIX: Apply Expo modules plugin for autolinking
+// Apply Expo modules plugin for autolinking
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()
 
@@ -45,23 +43,5 @@ allprojects {
         }
         google()
         maven { url 'https://www.jitpack.io' }
-    }
-
-    // 🛠️ FIX: Configure Android compilation settings for all projects (including Expo modules)
-    afterEvaluate { project ->
-        // Check if this project has the Android plugin applied
-        if (project.plugins.hasPlugin('com.android.application') ||
-            project.plugins.hasPlugin('com.android.library')) {
-            
-            project.android {
-                compileSdkVersion rootProject.ext.compileSdkVersion
-                buildToolsVersion rootProject.ext.buildToolsVersion
-                
-                defaultConfig {
-                    minSdkVersion rootProject.ext.minSdkVersion
-                    targetSdkVersion rootProject.ext.targetSdkVersion
-                }
-            }
-        }
     }
 }
