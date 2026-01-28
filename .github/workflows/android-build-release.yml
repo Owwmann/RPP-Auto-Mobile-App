@@ -31,7 +31,7 @@ jobs:
           npm list expo-modules-core || true
 
       - name: Prebuild Android Project (CLEAN + OPTIMIZED)
-        run: npx expo prebuild --platform android --clean --no-interactive
+        run: npx expo prebuild --platform android --clean
 
       - name: Make gradlew executable
         run: |
