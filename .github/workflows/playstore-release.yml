@@ -32,19 +32,10 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🏗️ Generate Android Project with Expo Prebuild
-        run: |
-          echo "🔧 Running expo prebuild to generate complete Android project..."
-          npx expo prebuild --platform android --no-install 
-
-          echo "✅ Verifying generated files..."
-          ls -la android/
-          ls -la android/gradlew
-          chmod +x android/gradlew
-
       - name: 🏗️ Build Release AAB
         run: |
           cd android
+          chmod +x ./gradlew
           ./gradlew bundleRelease --stacktrace --info --no-daemon
           echo "✅ AAB built successfully"
 
