@@ -32,16 +32,14 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🔨 Generate Gradle Wrapper
+      - name: 🏗️ Generate Android Native Project
         run: |
-          cd android
-          # Use Gradle to generate the wrapper if it doesn't exist
-          if [ ! -f "gradlew" ]; then
-            echo "🔧 Generating Gradle wrapper..."
-            gradle wrapper --gradle-version 8.3
-          fi
-          chmod +x gradlew
-          ls -la gradlew
+          echo "🔧 Running expo prebuild to generate android folder..."
+          npx expo prebuild --platform android --no-install
+
+          echo "✅ Verifying gradlew was generated..."
+          ls -la android/gradlew
+          chmod +x android/gradlew
 
       - name: 🏗️ Build Release AAB
         run: |
