@@ -4,4 +4,4 @@ Android mobile application for RPP Auto.
 
 ## Building
 
-The app builds automatically on push to main branch. Build #21 in progress.
+The app builds automatically on push to main branch. Build #21 triggered.
