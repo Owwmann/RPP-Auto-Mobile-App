@@ -1,0 +1,81 @@
+name: Android Debug APK Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🔧 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+
+      - name: 📦 Install Dependencies
+        run: |
+          rm -rf node_modules package-lock.json yarn.lock
+          npm install --legacy-peer-deps --no-audit
+
+      - name: 🔨 Prebuild Android Project
+        run: |
+          npx expo prebuild --platform android --clean
+          
+          # Verify android folder was created
+          if [ ! -d "android" ]; then
+            echo "❌ ERROR: android folder not created!"
+            exit 1
+          fi
+          
+          echo "✅ Android project created"
+          ls -la android/
+
+      - name: 🛠️ Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: 🏗️ Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: 📋 Find and Copy APK
+        run: |
+          echo "🔍 Searching for APK files..."
+          find android -name "*.apk" -type f
+          
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -1)
+          
+          if [ -n "$APK_PATH" ]; then
+            cp "$APK_PATH" ./rpp-auto-debug.apk
+            echo "✅ APK found: $APK_PATH"
+            ls -lh ./rpp-auto-debug.apk
+          else
+            echo "❌ No APK found!"
+            exit 1
+          fi
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpp-auto-debug-apk
+          path: rpp-auto-debug.apk
+          retention-days: 30
+
+      - name: ✅ Build Complete
+        run: |
+          echo "🎉 Build completed successfully!"
+          echo "📲 Download the APK from the Artifacts section above."
+          ls -lh rpp-auto-debug.apk
