@@ -23,7 +23,7 @@ module.exports = {
     package: "com.rppauto.app",
     versionCode: 1,
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
+      foregroundImage: "./assets/icon.png",
       backgroundColor: "#FFFFFF"
     },
     // CRITICAL: Configure Android SDK versions for Gradle 8 compatibility
