@@ -1,15 +1,7 @@
 # RPP Auto Mobile App
 
-🚗 **Recession-Proof Products Auto Mobile SaaS App** with AI Diagnostics, OBD2 Integration, and Multi-Agent Architecture
+Android mobile application for RPP Auto.
 
-## Latest Build Status
+## Building
 
-Android Release Build - Latest commit with all fixes applied.
-
-- ✅ Icon and splash screen assets added
-- ✅ Gradle configuration fixes included
-- ✅ Workflow optimized for Expo prebuild
-
----
-
-*Last updated: 2026-01-28*
+The app builds automatically on push to main branch. Build #21 in progress.
