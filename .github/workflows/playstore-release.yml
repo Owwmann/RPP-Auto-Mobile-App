@@ -27,12 +27,10 @@ jobs:
         with:
           node-version: '22.11.0'
 
-      - name: 📦 Clean Install Dependencies
+      - name: 📦 Install Dependencies
         run: |
-          rm -rf node_modules package-lock.json yarn.lock android/.gradle
+          rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
-          npm list expo-modules-core || true
-          echo "✅ Dependencies installed"
 
       - name: 🔨 Prebuild Android Project
         run: |
@@ -44,62 +42,6 @@ jobs:
           fi
           
           echo "✅ Android project created"
-          ls -la android/
-
-      - name: 🔧 Fix Gradle Configuration
-        run: |
-          echo "📝 Fixing Gradle configuration..."
-          
-          # Fix android/build.gradle - add compileSdkVersion if missing
-          if ! grep -q "compileSdkVersion" android/build.gradle; then
-            echo "Adding buildscript and compileSdkVersion to android/build.gradle..."
-            cat > android/build.gradle.tmp << 'EOF'
-buildscript {
-    ext {
-        buildToolsVersion = "34.0.0"
-        minSdkVersion = 24
-        compileSdkVersion = 34
-        targetSdkVersion = 34
-    }
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("com.google.gms:google-services:4.4.0")
-    }
-}
-
-apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
-
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-
-    defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-    }
-}
-EOF
-            mv android/build.gradle android/build.gradle.old
-            mv android/build.gradle.tmp android/build.gradle
-          fi
-          
-          # Fix android/app/build.gradle - ensure proper publishing configuration
-          echo "Fixing android/app/build.gradle..."
-          sed -i '/components.release/d' android/app/build.gradle || true
-          
-          echo "✅ Gradle configuration fixed"
           ls -la android/
 
       - name: 🛠️ Make gradlew Executable
