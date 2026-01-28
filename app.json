@@ -36,7 +36,9 @@
       "compileSdkVersion": 34,
       "targetSdkVersion": 34,
       "minSdkVersion": 24,
-      "buildToolsVersion": "34.0.0"
+      "buildToolsVersion": "34.0.0",
+      "gradleVersion": "8.10.2",
+      "newArchEnabled": false
     },
     "plugins": [
       [
@@ -50,7 +52,9 @@
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,
             "minSdkVersion": 24,
-            "buildToolsVersion": "34.0.0"
+            "buildToolsVersion": "34.0.0",
+            "kotlinVersion": "1.9.24",
+            "newArchEnabled": false
           }
         }
       ]
