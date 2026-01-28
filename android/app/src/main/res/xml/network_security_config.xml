@@ -6,10 +6,11 @@
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
-        <pin-set expiration="2027-01-27">
-            <!-- Replace with actual certificate hash -->
-            <pin digest="SHA-256">PLACEHOLDER_CERT_HASH_BASE64==</pin>
-            <pin digest="SHA-256">PLACEHOLDER_BACKUP_CERT_HASH==</pin>
+        <pin-set expiration="2026-12-31">
+            <!-- ISRG Root X1 (Standard for Supabase/Vercel) -->
+            <pin digest="SHA-256">C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQZEJ0JflnmvPv=</pin>
+            <!-- Backup: DigiCert Global Root G2 -->
+            <pin digest="SHA-256">i7WTqTvh0OioIruIfFR4kMPnBqrS2rdiVPl/s2uC/CY=</pin>
         </pin-set>
     </domain-config>
 
