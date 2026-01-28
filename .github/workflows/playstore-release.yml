@@ -32,8 +32,16 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🛠️ Make gradlew Executable
-        run: chmod +x android/gradlew
+      - name: 🔨 Generate Gradle Wrapper
+        run: |
+          cd android
+          # Use Gradle to generate the wrapper if it doesn't exist
+          if [ ! -f "gradlew" ]; then
+            echo "🔧 Generating Gradle wrapper..."
+            gradle wrapper --gradle-version 8.3
+          fi
+          chmod +x gradlew
+          ls -la gradlew
 
       - name: 🏗️ Build Release AAB
         run: |
