@@ -32,18 +32,6 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🔨 Prebuild Android Project
-        run: |
-          npx expo prebuild --platform android --clean
-          
-          if [ ! -d "android" ]; then
-            echo "❌ ERROR: android folder not created!"
-            exit 1
-          fi
-          
-          echo "✅ Android project created"
-          ls -la android/
-
       - name: 🛠️ Make gradlew Executable
         run: chmod +x android/gradlew
 
