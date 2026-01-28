@@ -50,7 +50,7 @@ jobs:
       - name: 🏗️ Build Release AAB
         run: |
           cd android
-          ./gradlew bundleRelease --no-daemon --stacktrace
+          ./gradlew bundleRelease --stacktrace --info --no-daemon
           echo "✅ AAB built successfully"
 
       - name: 🔐 Sign AAB

@@ -49,7 +49,7 @@ jobs:
       - name: 🏗️ Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --stacktrace --info --no-daemon
 
       - name: 📋 Find and Copy APK
         run: |
