@@ -32,12 +32,18 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🏗️ Generate Android Native Project
+      - name: 🗑️ Clean Android Directory
         run: |
-          echo "🔧 Running expo prebuild to generate android folder..."
-          npx expo prebuild --platform android --no-install
+          echo "🧹 Removing existing android directory to ensure clean build..."
+          rm -rf android
 
-          echo "✅ Verifying gradlew was generated..."
+      - name: 🏗️ Generate Android Project with Expo Prebuild
+        run: |
+          echo "🔧 Running expo prebuild to generate complete Android project..."
+          npx expo prebuild --platform android --no-install --clean
+
+          echo "✅ Verifying generated files..."
+          ls -la android/
           ls -la android/gradlew
           chmod +x android/gradlew
 
