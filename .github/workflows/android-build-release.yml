@@ -30,8 +30,13 @@ jobs:
           npm install --legacy-peer-deps --no-audit
           npm list expo-modules-core || true
 
+      - name: Prebuild Android Project (CLEAN + OPTIMIZED)
+        run: npx expo prebuild --platform android --clean --no-interactive
+
       - name: Make gradlew executable
-        run: chmod +x android/gradlew
+        run: |
+          ls -la android/
+          chmod +x android/gradlew
 
       - name: Build Android App Bundle (AAB)
         run: cd android && ./gradlew bundleRelease
