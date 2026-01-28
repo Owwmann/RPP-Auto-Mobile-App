@@ -24,10 +24,11 @@ jobs:
         with:
           node-version: '22.11.0'
 
-      - name: Clean Install Dependencies (Remove Lockfiles)
+      - name: Aggressive Clean Install with Overrides
         run: |
-          rm -f package-lock.json yarn.lock
-          npm install
+          rm -rf node_modules package-lock.json yarn.lock android/.gradle
+          npm install --legacy-peer-deps --no-audit
+          npm list expo-modules-core || true
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
