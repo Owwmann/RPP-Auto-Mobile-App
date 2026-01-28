@@ -46,4 +46,18 @@ allprojects {
         google()
         maven { url 'https://www.jitpack.io' }
     }
+
+    // 🔧 FIX: Configure Android compilation settings for all projects (including Expo modules)
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (!project.android.hasProperty('compileSdkVersion') || project.android.compileSdkVersion == null) {
+                    compileSdkVersion rootProject.ext.compileSdkVersion
+                }
+                if (!project.android.hasProperty('buildToolsVersion') || project.android.buildToolsVersion == null) {
+                    buildToolsVersion rootProject.ext.buildToolsVersion
+                }
+            }
+        }
+    }
 }
