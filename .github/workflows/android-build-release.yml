@@ -24,8 +24,10 @@ jobs:
         with:
           node-version: '22.11.0'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Clean Install Dependencies (Remove Lockfiles)
+        run: |
+          rm -f package-lock.json yarn.lock
+          npm install
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
