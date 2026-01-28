@@ -1,0 +1,9 @@
+rootProject.name = 'RPPAutoMobileApp'
+
+// Apply Expo autolinking
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
+useExpoModules()
+
+// Include app module
+include ':app'
+project(':app').projectDir = new File(rootDir, 'app')
