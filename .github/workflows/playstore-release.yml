@@ -32,15 +32,25 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
+      - name: 🧹 Clean Android folder (safety measure)
+        run: rm -rf android
+
       - name: 🏗️ Generate Android Project
         run: |
           npx expo prebuild --platform android
           chmod +x android/gradlew
 
+      - name: ⚙️ Configure Gradle Memory (CI Hardening)
+        run: |
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.parallel=false" >> android/gradle.properties
+          echo "✅ Gradle configured with 4GB RAM, daemon disabled"
+
       - name: 🏗️ Build Release AAB
         run: |
           cd android
-          ./gradlew bundleRelease --stacktrace --info --no-daemon
+          ./gradlew bundleRelease --stacktrace --no-daemon
           echo "✅ AAB built successfully"
 
       - name: 🔐 Sign AAB
