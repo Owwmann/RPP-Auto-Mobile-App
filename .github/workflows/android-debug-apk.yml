@@ -38,46 +38,10 @@ jobs:
           npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
-      - name: ⚙️ Configure Gradle & Fix ALL Expo modules
+      - name: ⚙️ Execute Gradle Configuration Fix
         run: |
-          echo "═══════════════════════════════════════"
-          echo "🔧 SDK 34 Config - Run #46"
-          echo "═══════════════════════════════════════"
-          
-          # Gradle memory
-          echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
-          echo "org.gradle.daemon=false" >> android/gradle.properties
-          echo "org.gradle.parallel=false" >> android/gradle.properties
-          echo "org.gradle.configureondemand=false" >> android/gradle.properties
-
-          # FIX 1: Main :expo module
-          EXPO_MAIN="node_modules/expo/android/build.gradle"
-          if [ -f "$EXPO_MAIN" ]; then
-            if ! grep -q "compileSdkVersion" "$EXPO_MAIN"; then
-              echo 'android {' > "${EXPO_MAIN}.new"
-              echo '    compileSdkVersion 34' >> "${EXPO_MAIN}.new"
-              echo '    defaultConfig {' >> "${EXPO_MAIN}.new"
-              echo '        minSdkVersion 23' >> "${EXPO_MAIN}.new"
-              echo '        targetSdkVersion 34' >> "${EXPO_MAIN}.new"
-              echo '    }' >> "${EXPO_MAIN}.new"
-              echo '}' >> "${EXPO_MAIN}.new"
-              echo '' >> "${EXPO_MAIN}.new"
-              cat "$EXPO_MAIN" >> "${EXPO_MAIN}.new"
-              mv "${EXPO_MAIN}.new" "$EXPO_MAIN"
-              echo "✅ Main :expo configured"
-            fi
-          fi
-
-          # FIX 2: Other modules
-          for mod in node_modules/expo-*/android/build.gradle; do
-            if [ -f "$mod" ] && ! grep -q "compileSdkVersion" "$mod"; then
-              sed -i '/^android {/a\    compileSdkVersion 34\n    buildToolsVersion "34.0.0"' "$mod"
-              if grep -q "defaultConfig {" "$mod"; then
-                sed -i '/defaultConfig {/a\        targetSdkVersion 34\n        minSdkVersion 24' "$mod"
-              fi
-            fi
-          done
-
+          chmod +x fix_gradle_config.sh
+          ./fix_gradle_config.sh
       - name: 🔧 Patch ExpoModulesCorePlugin
         run: |
           PLUGIN="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
