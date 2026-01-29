@@ -40,12 +40,20 @@ jobs:
           npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
-      - name: ⚙️ Configure Gradle Memory (CI Hardening)
+      - name: ⚙️ Configure Gradle Memory & SDK (CI Fix)
         run: |
+          # Add Gradle memory configuration
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=false" >> android/gradle.properties
-          echo "✅ Gradle configured with 4GB RAM, daemon disabled"
+          
+          # Add Android SDK configuration (since expo-build-properties isn't applying)
+          echo "android.compileSdkVersion=34" >> android/gradle.properties
+          echo "android.targetSdkVersion=34" >> android/gradle.properties
+          echo "android.minSdkVersion=24" >> android/gradle.properties
+          echo "android.buildToolsVersion=34.0.0" >> android/gradle.properties
+          
+          echo "✅ Gradle configured with 4GB RAM and SDK 34"
 
       - name: 📋 Debug - Show gradle.properties
         run: cat android/gradle.properties
