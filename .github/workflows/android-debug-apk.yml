@@ -30,12 +30,12 @@ jobs:
           rm -rf node_modules package-lock.json yarn.lock
           npm install --legacy-peer-deps --no-audit
 
-      - name: 🧹 Clean Android folder (safety measure)
+      - name: 🧹 Clean Android folder
         run: rm -rf android
 
       - name: 🏗️ Generate Android Project
         run: |
-          npx expo prebuild --platform android
+          npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
       - name: ⚙️ Configure Gradle Memory (CI Hardening)
@@ -44,6 +44,9 @@ jobs:
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=false" >> android/gradle.properties
           echo "✅ Gradle configured with 4GB RAM, daemon disabled"
+
+      - name: 📋 Debug - Show gradle.properties
+        run: cat android/gradle.properties
 
       - name: 🏗️ Build Debug APK
         run: |
