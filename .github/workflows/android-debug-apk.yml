@@ -45,8 +45,12 @@ jobs:
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=false" >> android/gradle.properties
           
-          # Fix expo-constants build.gradle by adding compileSdkVersion at the top of android block
-          sed -i '/^android {/a\    compileSdkVersion = 34\n    targetSdkVersion = 34\n    minSdkVersion = 24\n    buildToolsVersion = "34.0.0"' node_modules/expo-constants/android/build.gradle
+          # Fix expo-constants build.gradle with proper SDK configuration
+          # Step 1: Add compileSdkVersion and buildToolsVersion to android {} block
+          sed -i '/^android {/a\    compileSdkVersion 34\n    buildToolsVersion "34.0.0"' node_modules/expo-constants/android/build.gradle
+
+          # Step 2: Add targetSdkVersion and minSdkVersion to defaultConfig {} block
+          sed -i '/defaultConfig {/a\        targetSdkVersion 34\n        minSdkVersion 24' node_modules/expo-constants/android/build.gradle
           
           echo "✅ Gradle configured with 4GB RAM and expo-constants fixed"
 
