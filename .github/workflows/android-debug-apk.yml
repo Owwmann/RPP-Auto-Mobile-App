@@ -38,10 +38,47 @@ jobs:
           npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
-      - name: ⚙️ Execute Gradle Configuration Fix
+      - name: ⚙️ Configure Gradle & Fix ALL Expo modules
         run: |
-          chmod +x fix_gradle_config.sh
-          ./fix_gradle_config.sh
+          echo "═══════════════════════════════════════"
+          echo "🔧 Comprehensive SDK 34 Fix - Run #48"
+          echo "═══════════════════════════════════════"
+
+          # Gradle memory
+          echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.parallel=false" >> android/gradle.properties
+          echo "org.gradle.configureondemand=false" >> android/gradle.properties
+
+          # COMPREHENSIVE FIX: Patch ALL Expo modules (including main :expo)
+          echo "🎯 Patching ALL Expo modules..."
+
+          # Create SDK config block
+          cat > /tmp/sdk_block.txt << 'ENDBLOCK'
+android {
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 34
+    }
+}
+
+ENDBLOCK
+
+          # Find ALL expo modules build.gradle files (including main expo and all expo-*)
+          find node_modules -type d \( -name "expo" -o -name "expo-*" \) -print0 2>/dev/null | while IFS= read -r -d '' dir; do
+            GRADLE_FILE="$dir/android/build.gradle"
+            if [ -f "$GRADLE_FILE" ]; then
+              # ALWAYS prepend SDK config (no conditional check)
+              cat /tmp/sdk_block.txt "$GRADLE_FILE" > "${GRADLE_FILE}.new"
+              mv "${GRADLE_FILE}.new" "$GRADLE_FILE"
+              echo "✅ Patched: $(basename $(dirname $(dirname $dir)))/$(basename $dir)"
+            fi
+          done
+
+          echo "✅ ALL Expo modules patched!"
+
       - name: 🔧 Patch ExpoModulesCorePlugin
         run: |
           PLUGIN="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
