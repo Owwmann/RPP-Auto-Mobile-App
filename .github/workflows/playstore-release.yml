@@ -42,94 +42,51 @@ jobs:
 
       - name: ⚙️ Configure Gradle & Fix ALL Expo modules
         run: |
-          echo "═══════════════════════════════════════════════"
-          echo "🔧 TCL Android 2025 Configuration Patch - Run #46"
-          echo "═══════════════════════════════════════════════"
-
-          # Add Gradle memory configuration
+          echo "═══════════════════════════════════════"
+          echo "🔧 SDK 34 Config - Run #46"
+          echo "═══════════════════════════════════════"
+          
+          # Gradle memory
           echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=false" >> android/gradle.properties
           echo "org.gradle.configureondemand=false" >> android/gradle.properties
-      # CRITICAL FIX 1: Patch Main :expo Module FIRST
-      MAIN_EXPO="node_modules/expo/android/build.gradle"
-      if [ -f "$MAIN_EXPO" ]; then
-        echo "📍 Patching PRIMARY expo module..."
-        if ! grep -q "compileSdkVersion" "$MAIN_EXPO"; then
-          # Insert android block at top of file
-          cat > "${MAIN_EXPO}.tmp" << 'EOF'
-android {
-    compileSdkVersion 34
-    defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 34
-    }
-}
 
-EOF
-          cat "$MAIN_EXPO" >> "${MAIN_EXPO}.tmp"
-          mv "${MAIN_EXPO}.tmp" "$MAIN_EXPO"
-          echo "✅ SUCCESS: Main expo module configured for SDK 34"
-        else
-          echo "⚠️  SKIP: Main expo module already configured"
-        fi
-      else
-        echo "❌ CRITICAL: Main expo build.gradle NOT FOUND"
-        echo "📁 Searching for alternative paths..."
-        find node_modules -name "build.gradle" -path "*/expo/android/*" | head -5
-        exit 1
-      fi
-
-      # CRITICAL FIX 2: Patch ALL Other Expo Modules
-      echo ""
-      echo "📦 Scanning for additional expo modules..."
-      PATCHED_COUNT=0
-      for module in node_modules/expo-*/android/build.gradle; do
-        if [ -f "$module" ]; then
-          if ! grep -q "compileSdkVersion" "$module"; then
-            sed -i '/^android {/a\    compileSdkVersion 34\n    buildToolsVersion "34.0.0"' "$module"
-            if grep -q "defaultConfig {" "$module"; then
-              sed -i '/defaultConfig {/a\        targetSdkVersion 34\n        minSdkVersion 24' "$module"
+          # FIX 1: Main :expo module
+          EXPO_MAIN="node_modules/expo/android/build.gradle"
+          if [ -f "$EXPO_MAIN" ]; then
+            if ! grep -q "compileSdkVersion" "$EXPO_MAIN"; then
+              echo 'android {' > "${EXPO_MAIN}.new"
+              echo '    compileSdkVersion 34' >> "${EXPO_MAIN}.new"
+              echo '    defaultConfig {' >> "${EXPO_MAIN}.new"
+              echo '        minSdkVersion 23' >> "${EXPO_MAIN}.new"
+              echo '        targetSdkVersion 34' >> "${EXPO_MAIN}.new"
+              echo '    }' >> "${EXPO_MAIN}.new"
+              echo '}' >> "${EXPO_MAIN}.new"
+              echo '' >> "${EXPO_MAIN}.new"
+              cat "$EXPO_MAIN" >> "${EXPO_MAIN}.new"
+              mv "${EXPO_MAIN}.new" "$EXPO_MAIN"
+              echo "✅ Main :expo configured"
             fi
-            echo "  ✅ $(basename $(dirname $(dirname $module)))"
-            PATCHED_COUNT=$((PATCHED_COUNT + 1))
           fi
-        fi
-      done
 
-      echo ""
-      echo "═══════════════════════════════════════════════"
-      echo "📊 Configuration Summary:"
-      echo "   - Main expo module: ✅ Configured"
-      echo "   - Additional modules patched: $PATCHED_COUNT"
-      echo "═══════════════════════════════════════════════"
-
-
-      - name: 🔧 Patch ExpoModulesCorePlugin (Prevent Component Error)
-        run: |
-          PLUGIN_FILE="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
-
-          if [ -f "$PLUGIN_FILE" ]; then
-            echo "🔍 Patching ExpoModulesCorePlugin.gradle..."
-
-            # Backup original
-            cp "$PLUGIN_FILE" "${PLUGIN_FILE}.backup"
-
-            # Fix line 85: components.release → components.findByName("release")
-            sed -i "s/components\.release/components.findByName(\"release\")/g" "$PLUGIN_FILE"
-
-            # Verify patch applied
-            if grep -q "components.findByName" "$PLUGIN_FILE"; then
-              echo "✅ SUCCESS: Plugin component access patched"
-              echo "   - Original backed up to: ${PLUGIN_FILE}.backup"
-            else
-              echo "⚠️  WARNING: Patch verification failed"
-              echo "   - Restoring from backup..."
-              mv "${PLUGIN_FILE}.backup" "$PLUGIN_FILE"
-              exit 1
+          # FIX 2: Other modules
+          for mod in node_modules/expo-*/android/build.gradle; do
+            if [ -f "$mod" ] && ! grep -q "compileSdkVersion" "$mod"; then
+              sed -i '/^android {/a\    compileSdkVersion 34\n    buildToolsVersion "34.0.0"' "$mod"
+              if grep -q "defaultConfig {" "$mod"; then
+                sed -i '/defaultConfig {/a\        targetSdkVersion 34\n        minSdkVersion 24' "$mod"
+              fi
             fi
-          else
-            echo "⚠️  SKIP: ExpoModulesCorePlugin.gradle not found (may not be required)"
+          done
+
+      - name: 🔧 Patch ExpoModulesCorePlugin
+        run: |
+          PLUGIN="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
+          if [ -f "$PLUGIN" ]; then
+            cp "$PLUGIN" "${PLUGIN}.bak"
+            perl -pi -e 's/components\.release/components.findByName("release")/g' "$PLUGIN"
+            grep -q "findByName" "$PLUGIN" && echo "✅ Plugin patched" || mv "${PLUGIN}.bak" "$PLUGIN"
           fi
 
       - name: 🏗️ Build Release AAB
