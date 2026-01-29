@@ -38,22 +38,15 @@ jobs:
           npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
-      - name: 🛠️ CRITICAL: Force CI Memory Configuration
+      - name: ⚙️ Configure Gradle & Fix ALL Expo modules
         run: |
-          echo "🔧 Forcing Gradle CI mode with strict memory limits..."
-          # OVERWRITE gradle.properties with CI-hardened config
-          echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError" > android/gradle.properties
+          # Add Gradle memory configuration
+          echo "org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=false" >> android/gradle.properties
           echo "org.gradle.configureondemand=false" >> android/gradle.properties
-          echo "org.gradle.vfs.watch=false" >> android/gradle.properties
-          echo "android.useAndroidX=true" >> android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
-          echo "✅ Gradle configured for CI stability"
-          cat android/gradle.properties
 
-      - name: ⚙️ Fix ALL Expo modules SDK
-        run: |
+          # Patch ALL Expo modules with SDK configuration
           echo "🔧 Patching ALL Expo modules..."
           for module in node_modules/expo-*/android/build.gradle; do
             if [ -f "$module" ]; then
@@ -64,7 +57,7 @@ jobs:
               echo "  ✓ $(basename $(dirname $(dirname $module)))"
             fi
           done
-          echo "✅ ALL Expo modules patched"
+          echo "✅ ALL Expo modules patched with SDK config"
 
       - name: 🏗️ Build Debug APK
         run: |
