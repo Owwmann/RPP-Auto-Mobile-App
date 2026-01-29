@@ -38,7 +38,7 @@ jobs:
           npx expo prebuild --clean --platform android
           chmod +x android/gradlew
 
-      - name: ⚙️ Configure Gradle & Fix expo-constants build.gradle
+      - name: ⚙️ Configure Gradle & Fix ALL Expo modules build.gradle
         run: |
           # Add Gradle memory configuration
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
