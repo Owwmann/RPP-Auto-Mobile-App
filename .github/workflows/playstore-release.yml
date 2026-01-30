@@ -35,30 +35,15 @@ jobs:
           # Create the fix script safely using cat
           cat << 'EOF' > fix_gradle_config.sh
           #!/bin/bash
-          echo "🚀 Starting TCL Android 2025 Configuration Fix..."
+          echo "🚀 Starting Android Configuration Fix..."
           
-          # FIX 1: PATCH MAIN EXPO MODULE
-          EXPO_BUILD="node_modules/expo/android/build.gradle"
-          if [ -f "$EXPO_BUILD" ]; then
-              echo "📍 Patching :expo module..."
-              echo "android { compileSdkVersion 34; defaultConfig { minSdkVersion 23; targetSdkVersion 34; } }" > temp_header.gradle
-              cat "$EXPO_BUILD" >> temp_header.gradle
-              mv temp_header.gradle "$EXPO_BUILD"
-          fi
-          
-          # FIX 2: PATCH PLUGIN COMPONENT ACCESS
+          # FIX 1: PATCH PLUGIN COMPONENT ACCESS
           PLUGIN_FILE="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
           if [ -f "$PLUGIN_FILE" ]; then
               echo "📍 Patching ExpoModulesCorePlugin..."
               perl -pi -e 's/components\.release/components.findByName("release")/g' "$PLUGIN_FILE"
           fi
           
-          # FIX 3: GLOBAL SDK SWEEP
-          find node_modules -path "*/android/build.gradle" -type f | while read file; do
-              if ! grep -q "compileSdkVersion" "$file"; then
-                  sed -i '/android {/a\    compileSdkVersion 34\n    defaultConfig {\n        minSdkVersion 23\n        targetSdkVersion 34\n    }' "$file"
-              fi
-          done
           echo "✅ CONFIGURATION FIX COMPLETE."
           EOF
           
