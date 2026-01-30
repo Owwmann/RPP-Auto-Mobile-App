@@ -30,26 +30,6 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: ⚙️ Create and Run Configuration Fix Script
-        run: |
-          # Create the fix script safely using cat
-          cat << 'EOF' > fix_gradle_config.sh
-          #!/bin/bash
-          echo "🚀 Starting Android Configuration Fix..."
-          
-          # FIX 1: PATCH PLUGIN COMPONENT ACCESS
-          PLUGIN_FILE="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
-          if [ -f "$PLUGIN_FILE" ]; then
-              echo "📍 Patching ExpoModulesCorePlugin..."
-              perl -pi -e 's/components\.release/components.findByName("release")/g' "$PLUGIN_FILE"
-          fi
-          
-          echo "✅ CONFIGURATION FIX COMPLETE."
-          EOF
-          
-          chmod +x fix_gradle_config.sh
-          ./fix_gradle_config.sh
-
       - name: 🔐 Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
@@ -67,7 +47,6 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          # -x lintVitalRelease skips strict linting which often fails on minor issues
           ./gradlew bundleRelease --stacktrace -x lint -x lintVitalRelease
 
       - name: 🔐 Setup Google Play Credentials

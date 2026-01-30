@@ -32,32 +32,11 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: ⚙️ Create and Run Configuration Fix Script
-        run: |
-          # Create the fix script safely using cat
-          cat << 'EOF' > fix_gradle_config.sh
-          #!/bin/bash
-          echo "🚀 Starting Android Configuration Fix..."
-          
-          # FIX 1: PATCH PLUGIN COMPONENT ACCESS
-          PLUGIN_FILE="node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle"
-          if [ -f "$PLUGIN_FILE" ]; then
-              echo "📍 Patching ExpoModulesCorePlugin..."
-              perl -pi -e 's/components\.release/components.findByName("release")/g' "$PLUGIN_FILE"
-          fi
-          
-          echo "✅ CONFIGURATION FIX COMPLETE."
-          EOF
-          
-          # Make executable and run
-          chmod +x fix_gradle_config.sh
-          ./fix_gradle_config.sh
-
       - name: 🏗️ Build Debug APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --info -x lint -x lintVitalRelease
+          ./gradlew assembleDebug --stacktrace -x lint -x lintVitalRelease
 
       - name: 📤 Upload Debug APK
         uses: actions/upload-artifact@v4
