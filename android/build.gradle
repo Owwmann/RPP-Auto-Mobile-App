@@ -46,20 +46,25 @@ allprojects {
     }
 }
 
-
-// Configure SDK versions for all subprojects (including expo modules)
+// Configure ALL subprojects BEFORE evaluation (not after)
 subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileSdkVersion rootProject.ext.compileSdkVersion
-
-                if (project.android.hasProperty('defaultConfig')) {
-                    project.android.defaultConfig {
-                        minSdkVersion rootProject.ext.minSdkVersion
-                        targetSdkVersion rootProject.ext.targetSdkVersion
-                    }
-                }
+    // Apply configuration BEFORE project evaluation
+    pluginManager.withPlugin("com.android.application") {
+        android {
+            compileSdkVersion rootProject.ext.compileSdkVersion
+            defaultConfig {
+                minSdkVersion rootProject.ext.minSdkVersion
+                targetSdkVersion rootProject.ext.targetSdkVersion
+            }
+        }
+    }
+    
+    pluginManager.withPlugin("com.android.library") {
+        android {
+            compileSdkVersion rootProject.ext.compileSdkVersion
+            defaultConfig {
+                minSdkVersion rootProject.ext.minSdkVersion
+                targetSdkVersion rootProject.ext.targetSdkVersion
             }
         }
     }
