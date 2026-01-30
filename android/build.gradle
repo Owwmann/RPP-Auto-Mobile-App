@@ -45,27 +45,3 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
-
-// Configure ALL subprojects BEFORE evaluation (not after)
-subprojects {
-    // Apply configuration BEFORE project evaluation
-    pluginManager.withPlugin("com.android.application") {
-        android {
-            compileSdkVersion rootProject.ext.compileSdkVersion
-            defaultConfig {
-                minSdkVersion rootProject.ext.minSdkVersion
-                targetSdkVersion rootProject.ext.targetSdkVersion
-            }
-        }
-    }
-    
-    pluginManager.withPlugin("com.android.library") {
-        android {
-            compileSdkVersion rootProject.ext.compileSdkVersion
-            defaultConfig {
-                minSdkVersion rootProject.ext.minSdkVersion
-                targetSdkVersion rootProject.ext.targetSdkVersion
-            }
-        }
-    }
-}
