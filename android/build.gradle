@@ -45,3 +45,22 @@ allprojects {
         maven { url 'https://www.jitpack.io' }
     }
 }
+
+
+// Configure SDK versions for all subprojects (including expo modules)
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+
+                if (project.android.hasProperty('defaultConfig')) {
+                    project.android.defaultConfig {
+                        minSdkVersion rootProject.ext.minSdkVersion
+                        targetSdkVersion rootProject.ext.targetSdkVersion
+                    }
+                }
+            }
+        }
+    }
+}
