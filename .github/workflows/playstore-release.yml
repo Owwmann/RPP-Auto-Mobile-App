@@ -30,20 +30,6 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Fix Expo Modules SDK Configuration
-        run: |
-          echo "🔧 Fixing Expo modules SDK configuration..."
-          # Fix expo-constants module
-          EXPO_CONSTANTS_BUILD="node_modules/expo-constants/android/build.gradle"
-          if [ -f "$EXPO_CONSTANTS_BUILD" ]; then
-            echo "Patching $EXPO_CONSTANTS_BUILD"
-            if ! grep -q "compileSdkVersion" "$EXPO_CONSTANTS_BUILD"; then
-              # Add SDK configuration after 'android {' line
-              sed -i '/^android {/a\    compileSdkVersion = 34\n    defaultConfig {\n        minSdkVersion 24\n        targetSdkVersion 34\n    }' "$EXPO_CONSTANTS_BUILD"
-            fi
-          fi
-          echo "✅ Expo modules fixed!"
-
       - name: 🔐 Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
