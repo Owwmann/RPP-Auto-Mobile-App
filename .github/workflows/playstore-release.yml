@@ -86,20 +86,26 @@ jobs:
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
 
-      - name: 🔧 FORCE minSdkVersion 24 in app/build.gradle
+      - name: 🎯 ACCURATE FIX - Update minSdkVersion in PROJECT-LEVEL build.gradle
         run: |
-          echo "📝 CRITICAL FIX: Forcing minSdkVersion 24 in android/app/build.gradle..."
-          APP_BUILD_GRADLE="android/app/build.gradle"
-          if [ -f "$APP_BUILD_GRADLE" ]; then
-            sed -i 's/minSdkVersion[[:space:]]*=[[:space:]]*23/minSdkVersion = 24/g' "$APP_BUILD_GRADLE"
-            sed -i 's/minSdkVersion[[:space:]]*23/minSdkVersion 24/g' "$APP_BUILD_GRADLE"
-            sed -i 's/minSdk[[:space:]]*=[[:space:]]*23/minSdk = 24/g' "$APP_BUILD_GRADLE"
-            sed -i 's/minSdk[[:space:]]*23/minSdk 24/g' "$APP_BUILD_GRADLE"
-            echo "✅ minSdkVersion forced to 24"
-            echo "📋 Verification - showing defaultConfig section:"
-            grep -A 10 "defaultConfig" "$APP_BUILD_GRADLE" || echo "No defaultConfig found"
+          echo "🎯 ACCURATE FIX: Updating minSdkVersion in android/build.gradle (project-level)"
+          PROJECT_BUILD_GRADLE="android/build.gradle"
+          
+          if [ -f "$PROJECT_BUILD_GRADLE" ]; then
+            echo "📋 Original ext block:"
+            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15 || echo "ext block not found in expected format"
+            
+            # Replace minSdkVersion = 23 with minSdkVersion = 24 in the ext block
+            sed -i 's/minSdkVersion = 23/minSdkVersion = 24/g' "$PROJECT_BUILD_GRADLE"
+            sed -i 's/minSdkVersion=23/minSdkVersion=24/g' "$PROJECT_BUILD_GRADLE"
+            sed -i 's/minSdkVersion: 23/minSdkVersion: 24/g' "$PROJECT_BUILD_GRADLE"
+            
+            echo ""
+            echo "✅ minSdkVersion updated to 24 in PROJECT-LEVEL build.gradle"
+            echo "📋 Updated ext block:"
+            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15 || echo "ext block not found"
           else
-            echo "❌ Error: $APP_BUILD_GRADLE not found!"
+            echo "❌ Error: $PROJECT_BUILD_GRADLE not found!"
             exit 1
           fi
 
