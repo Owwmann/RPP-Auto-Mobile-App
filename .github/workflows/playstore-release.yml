@@ -27,6 +27,23 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm install --legacy-peer-deps
 
+      - name: 🔧 Patch expo-constants
+        run: |
+          echo "📝 Patching expo-constants/android/build.gradle..."
+          TARGET_FILE="node_modules/expo-constants/android/build.gradle"
+          # Check if file exists
+          if [ -f "$TARGET_FILE" ]; then
+            # Append the required Android configuration to the end of the file
+            echo "" >> "$TARGET_FILE"
+            echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
+            echo "✅ Patch applied successfully to $TARGET_FILE"
+            # Print last 5 lines to verify
+            tail -n 5 "$TARGET_FILE"
+          else
+            echo "❌ Error: $TARGET_FILE not found!"
+            exit 1
+          fi
+
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
