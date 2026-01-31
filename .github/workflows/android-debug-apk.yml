@@ -1,1 +1,99 @@
-{{FILE_CONTENT_DEBUG}}
+name: Android Debug APK Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: 🔧 Patch expo-constants
+        run: |
+          echo "📝 Patching expo-constants/android/build.gradle..."
+          TARGET_FILE="node_modules/expo-constants/android/build.gradle"
+          # Check if file exists
+          if [ -f "$TARGET_FILE" ]; then
+            # Append the required Android configuration to the end of the file
+            echo "" >> "$TARGET_FILE"
+            echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
+            echo "✅ Patch applied successfully to $TARGET_FILE"
+            # Print last 5 lines to verify
+            tail -n 5 "$TARGET_FILE"
+          else
+            echo "❌ Error: $TARGET_FILE not found!"
+            exit 1
+          fi
+
+
+      - name: 🔧 Create Gradle Init Script
+        run: |
+          echo "📝 Creating global Gradle init script for SDK versions..."
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/sdk-versions.gradle << 'EOF'
+          allprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          if (!compileSdkVersion) {
+                              compileSdkVersion 34
+                              buildToolsVersion "34.0.0"
+                          }
+                          if (defaultConfig && !defaultConfig.minSdkVersion) {
+                              defaultConfig {
+                                  minSdkVersion 24
+                                  targetSdkVersion 34
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          EOF
+          echo "✅ Gradle init script created at ~/.gradle/init.d/sdk-versions.gradle"
+          cat ~/.gradle/init.d/sdk-versions.gradle
+
+      - name: 🏗️ Generate Android Project
+        run: npx expo prebuild --platform android --clean
+
+      - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
+        run: |
+          echo "📝 Appending FLIPPER_VERSION to android/gradle.properties..."
+          echo "" >> android/gradle.properties
+          echo "# Flipper configuration injected by CI" >> android/gradle.properties
+          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
+          echo "✅ Flipper version injected successfully."
+          cat android/gradle.properties
+
+      - name: 🏗️ Build Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace -x lint -x lintVitalRelease
+
+      - name: 📤 Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
