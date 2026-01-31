@@ -74,6 +74,34 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
+      - name: 🔧 CRITICAL FIX - Patch Kotlin & React Native Bridge (POST-PREBUILD)
+        run: |
+          echo "🔧 Applying critical post-prebuild fixes..."
+          echo ""
+          echo "📝 FIX #1: Force Kotlin 1.9.20 in build.gradle"
+          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          
+          echo ""
+          echo "📝 FIX #2 & #3: Add React Native Bridge compatibility to gradle.properties"
+          cat >> android/gradle.properties << 'EOF'
+
+# ===== CRITICAL FIXES FOR KOTLIN & REACT NATIVE BRIDGE =====
+# Applied post-expo-prebuild to fix compilation errors
+hermesEnabled=true
+newArchEnabled=false
+expo.useLegacyPackageStructure=false
+EOF
+
+          echo ""
+          echo "✅ All fixes applied successfully!"
+          echo ""
+          echo "🔍 Verification - kotlinVersion in build.gradle:"
+          grep "kotlinVersion" android/build.gradle | head -3
+          echo ""
+          echo "🔍 Verification - gradle.properties (last 8 lines):"
+          tail -n 8 android/gradle.properties
+
       - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
         run: |
           echo "📝 Appending FLIPPER_VERSION to android/gradle.properties..."
