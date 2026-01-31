@@ -32,12 +32,6 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Inject Global Gradle Properties
-        run: |
-          echo "📝 Injecting SDK versions into android/gradle.properties..."
-          cat android.gradle.properties >> android/gradle.properties
-          echo "✅ Content appended successfully."
-
       - name: 🏗️ Build Debug APK
         run: |
           cd android
