@@ -32,12 +32,6 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Configure Gradle SDK Properties
-        run: |
-          echo "📝 Copying gradle.properties to android folder..."
-          cp android.gradle.properties android/gradle.properties
-          echo "✅ SDK configuration applied"
-
       - name: 🏗️ Build Debug APK
         run: |
           cd android
