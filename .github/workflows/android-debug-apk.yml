@@ -1,4 +1,4 @@
-name: Play Store Release Build
+name: Android Debug APK Build
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-release-aab:
+  build-debug-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,19 +31,15 @@ jobs:
         run: |
           echo "📝 Patching expo-constants/android/build.gradle..."
           TARGET_FILE="node_modules/expo-constants/android/build.gradle"
-          # Check if file exists
           if [ -f "$TARGET_FILE" ]; then
-            # Append the required Android configuration to the end of the file
             echo "" >> "$TARGET_FILE"
             echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
             echo "✅ Patch applied successfully to $TARGET_FILE"
-            # Print last 5 lines to verify
             tail -n 5 "$TARGET_FILE"
           else
             echo "❌ Error: $TARGET_FILE not found!"
             exit 1
           fi
-
 
       - name: 🔧 Create Gradle Init Script
         run: |
@@ -83,6 +79,24 @@ jobs:
           echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
+
+      - name: 🔧 FORCE minSdkVersion 24 in app/build.gradle
+        run: |
+          echo "📝 CRITICAL FIX: Forcing minSdkVersion 24 in android/app/build.gradle..."
+          APP_BUILD_GRADLE="android/app/build.gradle"
+          if [ -f "$APP_BUILD_GRADLE" ]; then
+            # Use sed to replace minSdkVersion 23 with 24
+            sed -i 's/minSdkVersion[[:space:]]*=[[:space:]]*23/minSdkVersion = 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdkVersion[[:space:]]*23/minSdkVersion 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdk[[:space:]]*=[[:space:]]*23/minSdk = 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdk[[:space:]]*23/minSdk 24/g' "$APP_BUILD_GRADLE"
+            echo "✅ minSdkVersion forced to 24"
+            echo "📋 Verification - showing defaultConfig section:"
+            grep -A 10 "defaultConfig" "$APP_BUILD_GRADLE" || echo "No defaultConfig found"
+          else
+            echo "❌ Error: $APP_BUILD_GRADLE not found!"
+            exit 1
+          fi
 
       - name: 🏗️ Build Debug APK
         run: |
