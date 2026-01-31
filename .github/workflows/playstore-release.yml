@@ -8,7 +8,7 @@ on:
 jobs:
   build-release-aab:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: ✅ Checkout repository
         uses: actions/checkout@v4
@@ -29,6 +29,12 @@ jobs:
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
+
+      - name: 🔧 Inject Global Gradle Properties
+        run: |
+          echo "📝 Injecting SDK versions into android/gradle.properties..."
+          cat android.gradle.properties >> android/gradle.properties
+          echo "✅ Content appended successfully."
 
       - name: 🔐 Decode Keystore
         env:
