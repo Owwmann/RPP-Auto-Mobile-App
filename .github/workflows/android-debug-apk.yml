@@ -80,24 +80,22 @@ jobs:
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
 
-      - name: 🎯 ACCURATE FIX - Update minSdkVersion in PROJECT-LEVEL build.gradle
+      - name: 🎯 ULTIMATE FIX - Update minSdkVersion fallback value in PROJECT build.gradle
         run: |
-          echo "🎯 ACCURATE FIX: Updating minSdkVersion in android/build.gradle (project-level)"
+          echo "🎯 ULTIMATE FIX: Replacing '23' with '24' in findProperty() fallback"
           PROJECT_BUILD_GRADLE="android/build.gradle"
           
           if [ -f "$PROJECT_BUILD_GRADLE" ]; then
             echo "📋 Original ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15 || echo "ext block not found in expected format"
+            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
             
-            # Replace minSdkVersion = 23 with minSdkVersion = 24 in the ext block
-            sed -i 's/minSdkVersion = 23/minSdkVersion = 24/g' "$PROJECT_BUILD_GRADLE"
-            sed -i 's/minSdkVersion=23/minSdkVersion=24/g' "$PROJECT_BUILD_GRADLE"
-            sed -i 's/minSdkVersion: 23/minSdkVersion: 24/g' "$PROJECT_BUILD_GRADLE"
+            # Replace the '23' in the findProperty fallback for minSdkVersion
+            sed -i "s/findProperty('android.minSdkVersion') ?: '23'/findProperty('android.minSdkVersion') ?: '24'/g" "$PROJECT_BUILD_GRADLE"
             
             echo ""
-            echo "✅ minSdkVersion updated to 24 in PROJECT-LEVEL build.gradle"
+            echo "✅ minSdkVersion fallback updated from '23' to '24'"
             echo "📋 Updated ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15 || echo "ext block not found"
+            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
           else
             echo "❌ Error: $PROJECT_BUILD_GRADLE not found!"
             exit 1
