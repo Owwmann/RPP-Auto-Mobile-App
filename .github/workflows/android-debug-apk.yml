@@ -46,6 +46,34 @@ jobs:
             exit 1
           fi
 
+
+      - name: 🔧 Create Gradle Init Script
+        run: |
+          echo "📝 Creating global Gradle init script for SDK versions..."
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/sdk-versions.gradle << 'EOF'
+          allprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          if (!compileSdkVersion) {
+                              compileSdkVersion 34
+                              buildToolsVersion "34.0.0"
+                          }
+                          if (defaultConfig && !defaultConfig.minSdkVersion) {
+                              defaultConfig {
+                                  minSdkVersion 24
+                                  targetSdkVersion 34
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          EOF
+          echo "✅ Gradle init script created at ~/.gradle/init.d/sdk-versions.gradle"
+          cat ~/.gradle/init.d/sdk-versions.gradle
+
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
