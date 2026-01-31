@@ -24,26 +24,28 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 📦 Install Dependencies
-        run: npm install --legacy-peer-deps
+      - name: 🧹 Clean npm cache and fresh install
+        run: |
+          echo "🧹 Cleaning npm cache to fix React Native bundler issues..."
+          npm cache clean --force
+          rm -rf node_modules package-lock.json
+          echo "📦 Fresh install with legacy peer deps..."
+          npm install --legacy-peer-deps
+          echo "✅ Dependencies installed cleanly"
 
       - name: 🔧 Patch expo-constants
         run: |
           echo "📝 Patching expo-constants/android/build.gradle..."
           TARGET_FILE="node_modules/expo-constants/android/build.gradle"
-          # Check if file exists
           if [ -f "$TARGET_FILE" ]; then
-            # Append the required Android configuration to the end of the file
             echo "" >> "$TARGET_FILE"
             echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
             echo "✅ Patch applied successfully to $TARGET_FILE"
-            # Print last 5 lines to verify
             tail -n 5 "$TARGET_FILE"
           else
             echo "❌ Error: $TARGET_FILE not found!"
             exit 1
           fi
-
 
       - name: 🔧 Create Gradle Init Script
         run: |
@@ -84,6 +86,23 @@ jobs:
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
 
+      - name: 🔧 FORCE minSdkVersion 24 in app/build.gradle
+        run: |
+          echo "📝 CRITICAL FIX: Forcing minSdkVersion 24 in android/app/build.gradle..."
+          APP_BUILD_GRADLE="android/app/build.gradle"
+          if [ -f "$APP_BUILD_GRADLE" ]; then
+            sed -i 's/minSdkVersion[[:space:]]*=[[:space:]]*23/minSdkVersion = 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdkVersion[[:space:]]*23/minSdkVersion 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdk[[:space:]]*=[[:space:]]*23/minSdk = 24/g' "$APP_BUILD_GRADLE"
+            sed -i 's/minSdk[[:space:]]*23/minSdk 24/g' "$APP_BUILD_GRADLE"
+            echo "✅ minSdkVersion forced to 24"
+            echo "📋 Verification - showing defaultConfig section:"
+            grep -A 10 "defaultConfig" "$APP_BUILD_GRADLE" || echo "No defaultConfig found"
+          else
+            echo "❌ Error: $APP_BUILD_GRADLE not found!"
+            exit 1
+          fi
+
       - name: 🔐 Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
@@ -111,7 +130,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: service-account.json
-          packageName: com.owwmann.rppauto mobileapp
+          packageName: com.rppauto.mobileapp
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: internal
           status: draft
