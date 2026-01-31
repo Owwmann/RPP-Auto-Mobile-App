@@ -1,4 +1,4 @@
-name: Play Store Release Build
+name: Android Debug APK Build
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-release-aab:
+  build-debug-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,12 +22,11 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18.x'
+          cache: 'npm'
 
-      - name: 📦 Install Dependencies (with cache clean)
+      - name: 📦 Install Dependencies
         run: |
-          echo "🧹 Cleaning npm cache..."
-          npm cache clean --force || true
           echo "📦 Installing dependencies with legacy peer deps..."
           npm install --legacy-peer-deps
           echo "✅ Dependencies installed successfully"
@@ -85,55 +84,25 @@ jobs:
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
 
-      - name: 🎯 ULTIMATE FIX - Update minSdkVersion fallback value in PROJECT build.gradle
+      - name: 🎯 FIX minSdkVersion to 24
         run: |
-          echo "🎯 ULTIMATE FIX: Replacing '23' with '24' in findProperty() fallback"
-          PROJECT_BUILD_GRADLE="android/build.gradle"
-          
-          if [ -f "$PROJECT_BUILD_GRADLE" ]; then
-            echo "📋 Original ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
-            
-            # Replace the '23' in the findProperty fallback for minSdkVersion
-            sed -i "s/findProperty('android.minSdkVersion') ?: '23'/findProperty('android.minSdkVersion') ?: '24'/g" "$PROJECT_BUILD_GRADLE"
-            
-            echo ""
-            echo "✅ minSdkVersion fallback updated from '23' to '24'"
-            echo "📋 Updated ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
-          else
-            echo "❌ Error: $PROJECT_BUILD_GRADLE not found!"
-            exit 1
-          fi
+          echo "🎯 Setting minSdkVersion to 24 via gradle.properties (most reliable method)"
+          echo "" >> android/gradle.properties
+          echo "# minSdkVersion override for Expo compatibility" >> android/gradle.properties
+          echo "android.minSdkVersion=24" >> android/gradle.properties
+          echo "✅ Set android.minSdkVersion=24 in gradle.properties"
+          echo ""
+          echo "📋 Final gradle.properties:"
+          cat android/gradle.properties
 
-      - name: 🔐 Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
-        run: |
-          echo "Decoding keystore file..."
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-          ls -l android/app/upload-keystore.jks
-
-      - name: 🏗️ Build Release AAB
-        env:
-          ORG_GRADLE_PROJECT_storeFile: upload-keystore.jks
-          ORG_GRADLE_PROJECT_storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_keyAlias: ${{ secrets.KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: 🏗️ Build Debug APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease --stacktrace -x lint -x lintVitalRelease
+          ./gradlew assembleDebug --stacktrace
 
-      - name: 🔐 Setup Google Play Credentials
-        run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service-account.json
-
-      - name: 📤 Upload to Play Store
-        uses: r0adkll/upload-google-play@v1
+      - name: 📤 Upload Debug APK
+        uses: actions/upload-artifact@v4
         with:
-          serviceAccountJson: service-account.json
-          packageName: com.rppauto.mobileapp
-          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          status: draft
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk

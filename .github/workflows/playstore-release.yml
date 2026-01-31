@@ -22,15 +22,35 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18.x'
+          cache: 'npm'
 
-      - name: 📦 Install Dependencies (with cache clean)
+      - name: 📦 Install Dependencies (with retry)
         run: |
-          echo "🧹 Cleaning npm cache..."
+          echo "📦 Installing dependencies with network retry logic..."
           npm cache clean --force || true
-          echo "📦 Installing dependencies with legacy peer deps..."
+          rm -rf node_modules
+          
+          # Keep package-lock.json for faster, more reliable installs!
+          # Retry on failure for network resilience
+          npm install --legacy-peer-deps || \
+          npm install --legacy-peer-deps || \
           npm install --legacy-peer-deps
+          
           echo "✅ Dependencies installed successfully"
+        timeout-minutes: 10
+
+      - name: ✅ Verify React Native Installation
+        run: |
+          echo "🔍 Verifying React Native integrity..."
+          
+          if [ ! -f "node_modules/react-native/index.js" ]; then
+            echo "❌ React Native missing! Reinstalling..."
+            rm -rf node_modules/react-native
+            npm install react-native --legacy-peer-deps
+          fi
+          
+          echo "✅ React Native verified successfully"
 
       - name: 🔧 Patch expo-constants
         run: |
@@ -85,26 +105,16 @@ jobs:
           echo "✅ Flipper version injected successfully."
           cat android/gradle.properties
 
-      - name: 🎯 ULTIMATE FIX - Update minSdkVersion fallback value in PROJECT build.gradle
+      - name: 🎯 FIX minSdkVersion to 24
         run: |
-          echo "🎯 ULTIMATE FIX: Replacing '23' with '24' in findProperty() fallback"
-          PROJECT_BUILD_GRADLE="android/build.gradle"
-          
-          if [ -f "$PROJECT_BUILD_GRADLE" ]; then
-            echo "📋 Original ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
-            
-            # Replace the '23' in the findProperty fallback for minSdkVersion
-            sed -i "s/findProperty('android.minSdkVersion') ?: '23'/findProperty('android.minSdkVersion') ?: '24'/g" "$PROJECT_BUILD_GRADLE"
-            
-            echo ""
-            echo "✅ minSdkVersion fallback updated from '23' to '24'"
-            echo "📋 Updated ext block:"
-            grep -A 10 "ext {" "$PROJECT_BUILD_GRADLE" | head -15
-          else
-            echo "❌ Error: $PROJECT_BUILD_GRADLE not found!"
-            exit 1
-          fi
+          echo "🎯 Setting minSdkVersion to 24 via gradle.properties (most reliable method)"
+          echo "" >> android/gradle.properties
+          echo "# minSdkVersion override for Expo compatibility" >> android/gradle.properties
+          echo "android.minSdkVersion=24" >> android/gradle.properties
+          echo "✅ Set android.minSdkVersion=24 in gradle.properties"
+          echo ""
+          echo "📋 Final gradle.properties:"
+          cat android/gradle.properties
 
       - name: 🔐 Decode Keystore
         env:
