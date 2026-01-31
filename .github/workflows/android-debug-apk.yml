@@ -1,4 +1,4 @@
-name: Android Debug APK Build
+name: Play Store Release Build
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-debug-apk:
+  build-release-aab:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,8 +24,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 📦 Install Dependencies
-        run: npm install --legacy-peer-deps
+      - name: 📦 Install Dependencies (with cache clean)
+        run: |
+          echo "🧹 Cleaning npm cache..."
+          npm cache clean --force || true
+          echo "📦 Installing dependencies with legacy peer deps..."
+          npm install --legacy-peer-deps
+          echo "✅ Dependencies installed successfully"
 
       - name: 🔧 Patch expo-constants
         run: |
@@ -101,14 +106,34 @@ jobs:
             exit 1
           fi
 
-      - name: 🏗️ Build Debug APK
+      - name: 🔐 Decode Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
+        run: |
+          echo "Decoding keystore file..."
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          ls -l android/app/upload-keystore.jks
+
+      - name: 🏗️ Build Release AAB
+        env:
+          ORG_GRADLE_PROJECT_storeFile: upload-keystore.jks
+          ORG_GRADLE_PROJECT_storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_keyAlias: ${{ secrets.KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_keyPassword: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace -x lint -x lintVitalRelease
+          ./gradlew bundleRelease --stacktrace -x lint -x lintVitalRelease
 
-      - name: 📤 Upload Debug APK
-        uses: actions/upload-artifact@v4
+      - name: 🔐 Setup Google Play Credentials
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service-account.json
+
+      - name: 📤 Upload to Play Store
+        uses: r0adkll/upload-google-play@v1
         with:
-          name: debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          serviceAccountJson: service-account.json
+          packageName: com.rppauto.mobileapp
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
