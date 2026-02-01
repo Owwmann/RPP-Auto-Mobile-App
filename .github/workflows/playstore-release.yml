@@ -93,26 +93,31 @@ jobs:
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
+
       - name: 🔧 Apply Native Fixes (Post-Prebuild)
         run: |
           echo "Applying Kotlin 1.9.20 fix to build.gradle..."
           sed -i 's/kotlinVersion = \"1.8.0\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
           sed -i 's/kotlinVersion = \"1.9.24\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
-
-          echo "Adding React Native Bridge compatibility flags..."
+          
+          echo "Injecting Bridge Compatibility Flags into gradle.properties..."
           cat >> android/gradle.properties << 'EOF'
 hermesEnabled=true
 newArchEnabled=false
 expo.useLegacyPackageStructure=false
 EOF
-
+          
           echo "Increasing Gradle Memory Limit..."
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
-
+          
           echo "✅ POST-PREBUILD fixes applied successfully"
-          grep "kotlinVersion" android/build.gradle
-          tail -8 android/gradle.properties
+          echo ""
+          echo "📋 Final build.gradle kotlinVersion:"
+          grep "kotlinVersion" android/build.gradle || echo "No kotlinVersion found"
+          echo ""
+          echo "📋 Final gradle.properties (last 8 lines):"
+          tail -n 8 android/gradle.properties
 
       - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
         run: |
