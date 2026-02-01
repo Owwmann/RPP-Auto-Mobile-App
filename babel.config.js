@@ -2,15 +2,9 @@ module.exports = function(api) {
   api.cache(true);
   return {
     presets: [
-      'babel-preset-expo',
-      '@babel/preset-flow',  // CRITICAL: Strip Flow type annotations
+      'module:metro-react-native-babel-preset',  // ✅ THIS handles Flow natively!
     ],
     plugins: [
-      // TypeScript transform - CRITICAL for generic syntax
-      ['@babel/plugin-transform-typescript', {
-        isTSX: true,
-        allExtensions: true,
-      }],
       // React Native environment variables
       ['module:react-native-dotenv', {
         moduleName: '@env',
