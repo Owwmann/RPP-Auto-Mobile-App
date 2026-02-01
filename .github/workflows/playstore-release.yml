@@ -32,10 +32,6 @@ jobs:
           rm -rf node_modules
           # Install legacy peer deps to handle version mismatches
           npm install --legacy-peer-deps
-          # CRITICAL: Install missing dependencies causing Metro bundler failures
-          npm install react-native-gesture-handler --legacy-peer-deps
-          # Ensure build-time dependencies are present
-          npm install --save-dev metro-react-native-babel-transformer@^0.76.0 @babel/preset-flow@^7.24.0 --legacy-peer-deps
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
@@ -86,6 +82,9 @@ jobs:
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "FLIPPER_VERSION=" >> android/gradle.properties
           echo "kotlin.version=1.9.20" >> android/gradle.properties
+          # Disable treating warnings as errors to fix Kotlin 1.5 API deprecation warning
+          echo "kotlin.compiler.execution.strategy=in-process" >> android/gradle.properties
+          echo "kotlin.compiler.allWarningsAsErrors=false" >> android/gradle.properties
 
       - name: 🔐 Decode Keystore
         env:
