@@ -61,25 +61,18 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Apply Gradle Properties & Disable Flipper
+      - name: 🔧 Apply Gradle Properties
         run: |
           # Add performance flags
           echo "" >> android/gradle.properties
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "reactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64" >> android/gradle.properties
+          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
           
           # Fix Kotlin version if needed
           sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle || true
           sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle || true
-          
-          # Disable Flipper completely by removing the dependency
-          if [ -f "android/settings.gradle" ]; then
-            sed -i '/react-native-flipper/d' android/settings.gradle
-          fi
-          if [ -f "android/settings.gradle.kts" ]; then
-            sed -i '/react-native-flipper/d' android/settings.gradle.kts
-          fi
 
       - name: 🔨 Build Debug APK
         run: |
