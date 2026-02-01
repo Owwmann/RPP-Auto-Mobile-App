@@ -28,9 +28,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Clean install to avoid conflicts
           npm cache clean --force || true
           rm -rf node_modules
+
+          # Install main dependencies
           npm install --legacy-peer-deps
+
+          # Install critical build dependencies missing from package.json
+          npm install --save-dev metro-react-native-babel-transformer@^0.76.0 @babel/preset-flow@^7.24.0 --legacy-peer-deps
         timeout-minutes: 10
 
       - name: Verify React Native
