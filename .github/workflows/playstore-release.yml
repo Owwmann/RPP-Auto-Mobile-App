@@ -32,8 +32,8 @@ jobs:
           
           # Keep package-lock.json for faster, more reliable installs!
           # Retry on failure for network resilience
-          npm install --legacy-peer-deps || \\
-          npm install --legacy-peer-deps || \\
+          npm install --legacy-peer-deps || \
+          npm install --legacy-peer-deps || \
           npm install --legacy-peer-deps
           
           echo "✅ Dependencies installed successfully"
@@ -72,8 +72,7 @@ jobs:
           cat > ~/.gradle/init.d/sdk-versions.gradle << 'EOF'
           allprojects {
               afterEvaluate { project ->
-                  if (project.hasProperty('android')) {
-                      project.android {
+                  if (project.hasProperty('android')) {                      project.android {
                           if (!compileSdkVersion) {
                               compileSdkVersion 34
                               buildToolsVersion "34.0.0"
@@ -94,6 +93,27 @@ jobs:
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
+
+      - name: 🔧 Apply Native Fixes (Post-Prebuild)
+        run: |
+          echo "Applying Kotlin 1.9.20 fix to build.gradle..."
+          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          
+          echo "Injecting Bridge Compatibility Flags into gradle.properties..."
+          echo "" >> android/gradle.properties
+          echo "hermesEnabled=true" >> android/gradle.properties
+          echo "newArchEnabled=false" >> android/gradle.properties
+          echo "expo.useLegacyPackageStructure=false" >> android/gradle.properties
+          
+          echo "✅ POST-PREBUILD fixes applied successfully"
+          echo ""
+          echo "📋 Final build.gradle kotlinVersion:"
+          grep "kotlinVersion" android/build.gradle || echo "No kotlinVersion found"
+          echo ""
+          echo "📋 Final gradle.properties (last 8 lines):"
+          tail -n 8 android/gradle.properties
+
 
       - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
         run: |
