@@ -67,15 +67,12 @@ jobs:
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
           
-          # Fix Kotlin version - FORCE 1.9.20 for ALL versions
+          # Fix Kotlin version - FORCE 1.9.20 to support expo-modules-core "data objects" feature
           sed -i 's/kotlinVersion = "[^"]*"/kotlinVersion = "1.9.20"/g' android/build.gradle || true
-          
-          # Verify the fix was applied
-          echo "✅ Verifying Kotlin version:"
-          grep "kotlinVersion" android/build.gradle || echo "⚠️ No kotlinVersion found in build.gradle"
-          
-          # Also set in gradle.properties as backup
-          echo "kotlin.version=1.9.20" >> android/gradle.properties
+
+          # Verify the change was applied
+          echo "📋 Kotlin version after fix:"
+          grep "kotlinVersion" android/build.gradle || echo "⚠️  No kotlinVersion found"
 
       - name: 🔐 Decode Keystore
         env:
