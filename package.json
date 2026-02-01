@@ -57,5 +57,8 @@
   },
   "overrides": {
     "expo-modules-core": "1.12.19"
+  },
+  "resolutions": {
+    "@types/react-native": "0.73.0"
   }
 }
