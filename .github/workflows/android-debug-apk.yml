@@ -36,7 +36,6 @@ jobs:
           npm install --legacy-peer-deps
           # CRITICAL: Install missing dependencies causing build failures
           npm install react-native-gesture-handler --legacy-peer-deps
-          npm install expo-modules-core@latest --legacy-peer-deps
           # Ensure build-time dependencies are present
           npm install --save-dev metro-react-native-babel-transformer@^0.76.0 @babel/preset-flow@^7.24.0 --legacy-peer-deps
 
