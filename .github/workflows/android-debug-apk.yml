@@ -33,7 +33,7 @@ jobs:
           npm cache clean --force || true
           rm -rf node_modules
           # Install legacy peer deps to handle version mismatches
-          npm install --legacy-peer-deps
+          npm install --force
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
@@ -88,12 +88,25 @@ jobs:
           # Disable treating warnings as errors to fix Kotlin 1.5 API deprecation warning
           echo "kotlin.compiler.execution.strategy=in-process" >> android/gradle.properties
           echo "kotlin.compiler.allWarningsAsErrors=false" >> android/gradle.properties
+          # AGGRESSIVE: Suppress all warnings and force compatibility
+          echo "android.suppressUnsupportedCompileSdk=true" >> android/gradle.properties
+          echo "android.suppressUnsupportedOptionWarnings=true" >> android/gradle.properties
+          echo "kotlin.incremental=false" >> android/gradle.properties
+          echo "org.gradle.warning.mode=none" >> android/gradle.properties
+
+
+      - name: 🧹 Clean Gradle Cache
+        run: |
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf android/.gradle/
+          echo "✅ Cleaned Gradle cache"
 
       - name: 🔨 Build Debug APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --no-daemon
+          ./gradlew assembleDebug --stacktrace --no-daemon -Dkotlin.compiler.execution.strategy=in-process -Pkotlin.compiler.execution.strategy=in-process --warning-mode=none
         timeout-minutes: 30
 
       - name: 📤 Upload Debug APK
