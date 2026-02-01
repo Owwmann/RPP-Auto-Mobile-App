@@ -48,6 +48,37 @@ jobs:
       - name: Generate Android Project
         run: npx expo prebuild --platform android --clean
 
+      - name: Fix expo-constants Build Configuration
+        run: |
+          echo "Patching expo-constants/android/build.gradle..."
+          EXPO_FILE="node_modules/expo-constants/android/build.gradle"
+
+          if [ -f "$EXPO_FILE" ]; then
+            # Prepend Android configuration to the file
+            cat > /tmp/expo-fix.gradle << 'EOFFIX'
+android {
+    compileSdk 34
+    buildToolsVersion "34.0.0"
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 34
+    }
+}
+
+EOFFIX
+            # Backup original
+            cp "$EXPO_FILE" "$EXPO_FILE.bak"
+            # Prepend the fix
+            cat /tmp/expo-fix.gradle "$EXPO_FILE.bak" > "$EXPO_FILE"
+            echo "✅ expo-constants patched successfully"
+            echo "First 30 lines of patched file:"
+            head -30 "$EXPO_FILE"
+          else
+            echo "❌ File not found: $EXPO_FILE"
+            exit 1
+          fi
+
       - name: Apply Post-Prebuild Fixes
         run: |
           echo "Applying Kotlin 1.9.20..."
