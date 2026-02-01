@@ -31,48 +31,37 @@ jobs:
           npm cache clean --force || true
           rm -rf node_modules
           npm install --legacy-peer-deps
-          npm install --save-dev metro-react-native-babel-transformer@^0.76.0 @babel/preset-flow@^7.24.0 --legacy-peer-deps
+        timeout-minutes: 10
 
-      - name: Verify React Native Installation
+      - name: Verify React Native
         run: |
           if [ ! -f "node_modules/react-native/index.js" ]; then
-            echo "React Native not found. Reinstalling..."
             npm install react-native --legacy-peer-deps
           fi
-
-      - name: Create Gradle Init Script
-        run: |
-          mkdir -p ~/.gradle/init.d
-          echo "allprojects { afterEvaluate { project -> if (project.hasProperty('android')) { project.android { if (!compileSdkVersion) { compileSdkVersion 34; buildToolsVersion '34.0.0' } if (defaultConfig && !defaultConfig.minSdkVersion) { defaultConfig { minSdkVersion 24; targetSdkVersion 34 } } } } } }" > ~/.gradle/init.d/sdk-versions.gradle
 
       - name: Generate Android Project
         run: npx expo prebuild --platform android --clean
 
       - name: Apply Post-Prebuild Fixes
         run: |
-          echo "--- Applying Kotlin Fixes ---"
-          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle || true
-          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle || true
+          echo "Applying Kotlin 1.9.20..."
+          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/minSdkVersion = 21/minSdkVersion = 24/g' android/build.gradle
 
-          echo "--- Injecting Gradle Properties ---"
+          echo "Injecting Gradle properties..."
           echo "" >> android/gradle.properties
-          echo "# React Native Bridge Flags" >> android/gradle.properties
           echo "hermesEnabled=true" >> android/gradle.properties
           echo "newArchEnabled=false" >> android/gradle.properties
           echo "expo.useLegacyPackageStructure=false" >> android/gradle.properties
-
-          echo "# Memory Optimization for CI" >> android/gradle.properties
+          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
+          echo "android.minSdkVersion=24" >> android/gradle.properties
           echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
 
-          echo "--- Injecting Flipper Version ---"
-          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
-
-          echo "--- Setting minSdkVersion ---"
-          echo "android.minSdkVersion=24" >> android/gradle.properties
-
-          echo "--- Verification ---"
-          tail -n 15 android/gradle.properties
+          echo "Verification:"
+          grep "kotlinVersion" android/build.gradle
+          tail -10 android/gradle.properties
 
       - name: Decode Keystore
         env:
@@ -89,7 +78,8 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease --stacktrace -x lint -x lintVitalRelease
+          ./gradlew bundleRelease --stacktrace
+        timeout-minutes: 20
 
       - name: Setup Google Play Credentials
         run: |
