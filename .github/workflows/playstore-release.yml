@@ -2,77 +2,53 @@ name: Play Store Release Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build-release-aab:
+    name: Build Release AAB
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: ✅ Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      
-      - name: 📦 Install Dependencies (with retry)
+          cache: 'npm'
+
+      - name: Install Dependencies
         run: |
-          echo "📦 Installing dependencies with network retry logic..."
-          npm cache clean --force || true
-          rm -rf node_modules
-          
-          # Keep package-lock.json for faster, more reliable installs!
-          # Retry on failure for network resilience
-          npm install --legacy-peer-deps || \
-          npm install --legacy-peer-deps || \
           npm install --legacy-peer-deps
-          
-          echo "✅ Dependencies installed successfully"
         timeout-minutes: 10
 
-      - name: ✅ Verify React Native Installation
+      - name: Patch expo-constants
         run: |
-          echo "🔍 Verifying React Native integrity..."
-          
-          if [ ! -f "node_modules/react-native/index.js" ]; then
-            echo "❌ React Native missing! Reinstalling..."
-            rm -rf node_modules/react-native
-            npm install react-native --legacy-peer-deps
-          fi
-          
-          echo "✅ React Native verified successfully"
-
-      - name: 🔧 Patch expo-constants
-        run: |
-          echo "📝 Patching expo-constants/android/build.gradle..."
           TARGET_FILE="node_modules/expo-constants/android/build.gradle"
           if [ -f "$TARGET_FILE" ]; then
             echo "" >> "$TARGET_FILE"
             echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
-            echo "✅ Patch applied successfully to $TARGET_FILE"
-            tail -n 5 "$TARGET_FILE"
-          else
-            echo "❌ Error: $TARGET_FILE not found!"
-            exit 1
           fi
 
-      - name: 🔧 Create Gradle Init Script
+      - name: Create Gradle Init Script
         run: |
-          echo "📝 Creating global Gradle init script for SDK versions..."
           mkdir -p ~/.gradle/init.d
           cat > ~/.gradle/init.d/sdk-versions.gradle << 'EOF'
           allprojects {
               afterEvaluate { project ->
-                  if (project.hasProperty('android')) {                      project.android {
+                  if (project.hasProperty('android')) {
+                      project.android {
                           if (!compileSdkVersion) {
                               compileSdkVersion 34
                               buildToolsVersion "34.0.0"
@@ -88,51 +64,35 @@ jobs:
               }
           }
           EOF
-          echo "✅ Gradle init script created at ~/.gradle/init.d/sdk-versions.gradle"
-          cat ~/.gradle/init.d/sdk-versions.gradle
 
-      - name: 🏗️ Generate Android Project
+      - name: Generate Android Project
         run: npx expo prebuild --platform android --clean
-      - name: 🔧 Apply Native Fixes (Post-Prebuild)
+
+      - name: Apply Post-Prebuild Fixes
         run: |
-          echo "Applying Kotlin 1.9.20 fix to build.gradle..."
-          sed -i 's/kotlinVersion = \"1.8.0\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
-          sed -i 's/kotlinVersion = \"1.9.24\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
-          echo "✅ Kotlin version set"
-          
-          echo "Adding React Native Bridge compatibility flags..."
+          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
           cat >> android/gradle.properties << 'EOF'
 hermesEnabled=true
 newArchEnabled=false
 expo.useLegacyPackageStructure=false
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+org.gradle.daemon=false
 EOF
-          echo "✅ Bridge compatibility flags added"
-          
-          echo "Increasing Gradle Memory Limit..."
-          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
-          echo "org.gradle.daemon=false" >> android/gradle.properties
-          echo "✅ Gradle memory optimization applied"
-          
-          echo "Verifying changes..."
-          grep "kotlinVersion" android/build.gradle
-          tail -8 android/gradle.properties
 
-      - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
+      - name: Inject FLIPPER_VERSION
         run: |
           echo "FLIPPER_VERSION=0.212.0" >> android/gradle.properties
-          echo "✅ FLIPPER_VERSION injected successfully"
 
-      - name: 🎯 FIX minSdkVersion to 24
+      - name: Fix minSdkVersion
         run: |
           sed -i 's/minSdkVersion = 21/minSdkVersion = 24/g' android/build.gradle
-          echo "✅ minSdkVersion updated to 24"
 
-      - name: 🔐 Decode Keystore
+      - name: Decode Keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
-          echo "✅ Keystore decoded successfully"
 
-      - name: 🏗️ Build Release AAB
+      - name: Build Release AAB
         run: |
           cd android
           ./gradlew bundleRelease \
@@ -140,15 +100,13 @@ EOF
             -PMYAPP_UPLOAD_KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}" \
             -PMYAPP_UPLOAD_STORE_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             -PMYAPP_UPLOAD_KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
-          echo "✅ AAB built successfully"
         timeout-minutes: 15
 
-      - name: 🔐 Setup Google Play Credentials
+      - name: Setup Google Play Credentials
         run: |
           echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > service_account.json
-          echo "✅ Service account configured"
 
-      - name: 📤 Upload to Play Store
+      - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: service_account.json
