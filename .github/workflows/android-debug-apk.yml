@@ -2,7 +2,7 @@ name: Android Debug APK Build
 
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
     branches:
@@ -16,50 +16,36 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: ✅ Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'npm'
-      
-      - name: 📦 Install Dependencies (with retry)
-        run: |
-          echo "📦 Installing dependencies with legacy peer deps..."
-          npm install --legacy-peer-deps || npm install --legacy-peer-deps --force
-          echo "✅ Dependencies installed successfully"
 
-      - name: ✅ Verify React Native Installation
+      - name: Install Dependencies
         run: |
-          echo "🔍 Verifying React Native installation..."
-          npx react-native --version
-          echo "✅ React Native is installed"
+          npm install --legacy-peer-deps
+        timeout-minutes: 10
 
-      - name: 🔧 Patch expo-constants
+      - name: Patch expo-constants
         run: |
-          echo "📝 Patching expo-constants/android/build.gradle..."
           TARGET_FILE="node_modules/expo-constants/android/build.gradle"
           if [ -f "$TARGET_FILE" ]; then
             echo "" >> "$TARGET_FILE"
             echo "android { compileSdkVersion 34; buildToolsVersion \"34.0.0\"; defaultConfig { minSdkVersion 24; targetSdkVersion 34 } }" >> "$TARGET_FILE"
-            echo "✅ Patch applied successfully to $TARGET_FILE"
-            tail -n 5 "$TARGET_FILE"
-          else
-            echo "❌ Error: $TARGET_FILE not found!"
-            exit 1
           fi
 
-      - name: 🔧 Create Gradle Init Script
+      - name: Create Gradle Init Script
         run: |
-          echo "📝 Creating global Gradle init script for SDK versions..."
           mkdir -p ~/.gradle/init.d
           cat > ~/.gradle/init.d/sdk-versions.gradle << 'EOF'
           allprojects {
@@ -81,66 +67,38 @@ jobs:
               }
           }
           EOF
-          echo "✅ Gradle init script created at ~/.gradle/init.d/sdk-versions.gradle"
-          cat ~/.gradle/init.d/sdk-versions.gradle
 
-      - name: 🏗️ Generate Android Project
+      - name: Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 CRITICAL FIX - Patch Kotlin & React Native Bridge (POST-PREBUILD)
+      - name: Apply Post-Prebuild Fixes
         run: |
-          echo "🔧 Applying critical post-prebuild fixes..."
-          echo ""
-          echo "📝 FIX #1: Force Kotlin 1.9.20 in build.gradle"
           sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
           sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
-          
-          echo ""
-          echo "📝 FIX #2 & #3: Add React Native Bridge compatibility to gradle.properties"
           cat >> android/gradle.properties << 'EOF'
-
-# ===== CRITICAL FIXES FOR KOTLIN & REACT NATIVE BRIDGE =====
-# Applied post-expo-prebuild to fix compilation errors
 hermesEnabled=true
 newArchEnabled=false
 expo.useLegacyPackageStructure=false
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+org.gradle.daemon=false
 EOF
 
-          echo ""
-          echo "✅ All fixes applied successfully!"
-          echo ""
-          echo "📍 Verification - kotlinVersion in build.gradle:"
-          grep "kotlinVersion" android/build.gradle | head -3
-          echo ""
-          echo "📍 Verification - gradle.properties (last 8 lines):"
-          tail -n 8 android/gradle.properties
-
-      - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
+      - name: Inject FLIPPER_VERSION
         run: |
-          echo "📝 Appending FLIPPER_VERSION to android/gradle.properties..."
-          echo "" >> android/gradle.properties
-          echo "# Flipper configuration injected by CI" >> android/gradle.properties
-          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
-          echo "✅ Flipper version injected successfully."
+          echo "FLIPPER_VERSION=0.212.0" >> android/gradle.properties
 
-      - name: 🎯 FIX minSdkVersion to 24
+      - name: Fix minSdkVersion
         run: |
-          echo "🎯 Setting minSdkVersion to 24 via gradle.properties (most reliable method)"
-          echo "" >> android/gradle.properties
-          echo "# minSdkVersion override for Expo compatibility" >> android/gradle.properties
-          echo "android.minSdkVersion=24" >> android/gradle.properties
-          echo "✅ Set android.minSdkVersion=24 in gradle.properties"
-          echo ""
-          echo "📋 Final gradle.properties:"
-          cat android/gradle.properties
+          sed -i 's/minSdkVersion = 21/minSdkVersion = 24/g' android/build.gradle
 
-      - name: 🏗️ Build Debug APK
+      - name: Build Debug APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
+        timeout-minutes: 15
 
-      - name: 📤 Upload Debug APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
