@@ -93,76 +93,65 @@ jobs:
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
-
       - name: 🔧 Apply Native Fixes (Post-Prebuild)
         run: |
           echo "Applying Kotlin 1.9.20 fix to build.gradle..."
-          sed -i 's/kotlinVersion = "1.8.0"/kotlinVersion = "1.9.20"/g' android/build.gradle
-          sed -i 's/kotlinVersion = "1.9.24"/kotlinVersion = "1.9.20"/g' android/build.gradle
+          sed -i 's/kotlinVersion = \"1.8.0\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
+          sed -i 's/kotlinVersion = \"1.9.24\"/kotlinVersion = \"1.9.20\"/g' android/build.gradle
+          echo "✅ Kotlin version set"
           
-          echo "Injecting Bridge Compatibility Flags into gradle.properties..."
-          echo "" >> android/gradle.properties
-          echo "hermesEnabled=true" >> android/gradle.properties
-          echo "newArchEnabled=false" >> android/gradle.properties
-          echo "expo.useLegacyPackageStructure=false" >> android/gradle.properties
+          echo "Adding React Native Bridge compatibility flags..."
+          cat >> android/gradle.properties << 'EOF'
+hermesEnabled=true
+newArchEnabled=false
+expo.useLegacyPackageStructure=false
+EOF
+          echo "✅ Bridge compatibility flags added"
           
-          echo "✅ POST-PREBUILD fixes applied successfully"
-          echo ""
-          echo "📋 Final build.gradle kotlinVersion:"
-          grep "kotlinVersion" android/build.gradle || echo "No kotlinVersion found"
-          echo ""
-          echo "📋 Final gradle.properties (last 8 lines):"
-          tail -n 8 android/gradle.properties
-
+          echo "Increasing Gradle Memory Limit..."
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "✅ Gradle memory optimization applied"
+          
+          echo "Verifying changes..."
+          grep "kotlinVersion" android/build.gradle
+          tail -8 android/gradle.properties
 
       - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
         run: |
-          echo "📝 Appending FLIPPER_VERSION to android/gradle.properties..."
-          echo "" >> android/gradle.properties
-          echo "# Flipper configuration injected by CI" >> android/gradle.properties
-          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
-          echo "✅ Flipper version injected successfully."
-          cat android/gradle.properties
+          echo "FLIPPER_VERSION=0.212.0" >> android/gradle.properties
+          echo "✅ FLIPPER_VERSION injected successfully"
 
       - name: 🎯 FIX minSdkVersion to 24
         run: |
-          echo "🎯 Setting minSdkVersion to 24 via gradle.properties (most reliable method)"
-          echo "" >> android/gradle.properties
-          echo "# minSdkVersion override for Expo compatibility" >> android/gradle.properties
-          echo "android.minSdkVersion=24" >> android/gradle.properties
-          echo "✅ Set android.minSdkVersion=24 in gradle.properties"
-          echo ""
-          echo "📋 Final gradle.properties:"
-          cat android/gradle.properties
+          sed -i 's/minSdkVersion = 21/minSdkVersion = 24/g' android/build.gradle
+          echo "✅ minSdkVersion updated to 24"
 
       - name: 🔐 Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
         run: |
-          echo "Decoding keystore file..."
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-          ls -l android/app/upload-keystore.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+          echo "✅ Keystore decoded successfully"
 
       - name: 🏗️ Build Release AAB
-        env:
-          ORG_GRADLE_PROJECT_storeFile: upload-keystore.jks
-          ORG_GRADLE_PROJECT_storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_keyAlias: ${{ secrets.KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_keyPassword: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
-          chmod +x gradlew
-          ./gradlew bundleRelease --stacktrace -x lint -x lintVitalRelease
+          ./gradlew bundleRelease \
+            -PMYAPP_UPLOAD_STORE_FILE=release.keystore \
+            -PMYAPP_UPLOAD_KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}" \
+            -PMYAPP_UPLOAD_STORE_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            -PMYAPP_UPLOAD_KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
+          echo "✅ AAB built successfully"
+        timeout-minutes: 15
 
       - name: 🔐 Setup Google Play Credentials
         run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service-account.json
+          echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > service_account.json
+          echo "✅ Service account configured"
 
       - name: 📤 Upload to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: service-account.json
-          packageName: com.rppauto.mobileapp
+          serviceAccountJson: service_account.json
+          packageName: com.rppautomobileapp
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: internal
-          status: draft
