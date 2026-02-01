@@ -2,12 +2,18 @@ name: Android Debug APK Build
 
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build-debug-apk:
+    name: Build Debug APK
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: ✅ Checkout repository
@@ -23,12 +29,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
+          cache: 'npm'
       
-      - name: 📦 Install Dependencies
+      - name: 📦 Install Dependencies (with retry)
         run: |
           echo "📦 Installing dependencies with legacy peer deps..."
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps || npm install --legacy-peer-deps --force
           echo "✅ Dependencies installed successfully"
+
+      - name: ✅ Verify React Native Installation
+        run: |
+          echo "🔍 Verifying React Native installation..."
+          npx react-native --version
+          echo "✅ React Native is installed"
 
       - name: 🔧 Patch expo-constants
         run: |
@@ -96,10 +109,10 @@ EOF
           echo ""
           echo "✅ All fixes applied successfully!"
           echo ""
-          echo "🔍 Verification - kotlinVersion in build.gradle:"
+          echo "📍 Verification - kotlinVersion in build.gradle:"
           grep "kotlinVersion" android/build.gradle | head -3
           echo ""
-          echo "🔍 Verification - gradle.properties (last 8 lines):"
+          echo "📍 Verification - gradle.properties (last 8 lines):"
           tail -n 8 android/gradle.properties
 
       - name: 🔧 Inject FLIPPER_VERSION into Gradle Properties
@@ -109,7 +122,6 @@ EOF
           echo "# Flipper configuration injected by CI" >> android/gradle.properties
           echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
           echo "✅ Flipper version injected successfully."
-          cat android/gradle.properties
 
       - name: 🎯 FIX minSdkVersion to 24
         run: |
@@ -133,3 +145,4 @@ EOF
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
