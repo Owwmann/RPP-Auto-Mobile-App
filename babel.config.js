@@ -3,6 +3,7 @@ module.exports = function(api) {
   return {
     presets: [
       'babel-preset-expo',
+      '@babel/preset-flow',  // CRITICAL: Strip Flow type annotations
     ],
     plugins: [
       // TypeScript transform - CRITICAL for generic syntax
