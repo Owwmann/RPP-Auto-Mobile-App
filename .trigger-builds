@@ -1,0 +1,6 @@
+Trigger timestamp: 2026-02-01T03:16:30Z
+
+Triggering builds to test:
+- ✅ Metro config fix (Expo transformer restored)
+- ✅ Babel config fix (react-native-dotenv plugin)
+- ✅ Workflow optimization (Gradle memory 4GB)
