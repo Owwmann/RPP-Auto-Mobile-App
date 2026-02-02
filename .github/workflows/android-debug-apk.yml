@@ -37,6 +37,12 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
+      - name: 🔧 Fix settings.gradle for Expo
+        run: |
+          # Remove incompatible React Native CLI plugin reference
+          sed -i '/id.*com\\.facebook\\.react\\.settings/d' android/settings.gradle
+          echo "✅ Patched settings.gradle for Expo SDK compatibility"
+
       - name: 🔨 Build Debug APK
         run: |
           cd android
