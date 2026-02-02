@@ -37,8 +37,23 @@ jobs:
 
       - name: 🔧 Fix settings.gradle for Expo
         run: |
-          # Remove incompatible React Native CLI plugin reference
-          sed -i '/id.*com\\.facebook\\.react\\.settings/d' android/settings.gradle
+          echo "Removing incompatible React Native CLI plugin..."
+          echo "BEFORE:"
+          cat android/settings.gradle
+          # Try multiple patterns to catch all variations
+          sed -i "/id.*'com\.facebook\.react\.settings'/d" android/settings.gradle
+          sed -i '/id.*"com\.facebook\.react\.settings"/d' android/settings.gradle
+          sed -i "/id('com\.facebook\.react\.settings')/d" android/settings.gradle
+          sed -i '/id("com\.facebook\.react\.settings")/d' android/settings.gradle
+          sed -i '/com\.facebook\.react\.settings/d' android/settings.gradle
+          echo ""
+          echo "AFTER:"
+          cat android/settings.gradle
+          echo ""
+          if grep -q "facebook.*react.*settings" android/settings.gradle; then
+            echo "❌ ERROR: facebook.react.settings still present!"
+            exit 1
+          fi
           echo "✅ Patched settings.gradle for Expo SDK compatibility"
 
       - name: 🔐 Decode Keystore
