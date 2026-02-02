@@ -30,74 +30,10 @@ jobs:
         run: |
           npm cache clean --force || true
           rm -rf node_modules
-          # Install legacy peer deps to handle version mismatches
           npm install --force
 
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
-
-      - name: 🔧 Create Global Gradle Fix Script (Kotlin + SDK)
-        run: |
-          # This script forces SDK 34 and Kotlin 1.9.20 on ALL modules
-          mkdir -p ~/.gradle/init.d
-          cat > ~/.gradle/init.d/force-sdk.gradle << 'EOF'
-          allprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty("android")) {
-                      project.android {
-                          compileSdkVersion 34
-                          buildToolsVersion "34.0.0"
-                          defaultConfig {
-                              minSdkVersion 24
-                              targetSdkVersion 34
-                          }
-                      }
-                  }
-              }
-              // Force Kotlin version resolution strategy
-              configurations.all {
-                  resolutionStrategy.eachDependency { details ->
-                      if (details.requested.group == 'org.jetbrains.kotlin') {
-                          details.useVersion '1.9.20'
-                      }
-                  }
-              }
-          }
-          EOF
-          echo "✅ Global Gradle init script created to force SDK 34 & Kotlin 1.9.20"
-
-      - name: 🔧 Patch Root Build Gradle
-        run: |
-          # Explicitly set Kotlin version in the root build.gradle file
-          if [ -f "android/build.gradle" ]; then
-             sed -i 's/ext.kotlinVersion = .*$/ext.kotlinVersion = "1.9.20"/g' android/build.gradle
-             echo "✅ Patched root android/build.gradle kotlinVersion"
-          fi
-
-      - name: 🔧 Apply Gradle Properties
-        run: |
-          # Add performance flags and disable Flipper
-          echo "" >> android/gradle.properties
-          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" >> android/gradle.properties
-          echo "org.gradle.daemon=false" >> android/gradle.properties
-          echo "FLIPPER_VERSION=" >> android/gradle.properties
-          echo "kotlin.version=1.9.20" >> android/gradle.properties
-          # Disable treating warnings as errors to fix Kotlin 1.5 API deprecation warning
-          echo "kotlin.compiler.execution.strategy=in-process" >> android/gradle.properties
-          echo "kotlin.compiler.allWarningsAsErrors=false" >> android/gradle.properties
-          # AGGRESSIVE: Suppress all warnings and force compatibility
-          echo "android.suppressUnsupportedCompileSdk=true" >> android/gradle.properties
-          echo "android.suppressUnsupportedOptionWarnings=true" >> android/gradle.properties
-          echo "kotlin.incremental=false" >> android/gradle.properties
-          echo "org.gradle.warning.mode=none" >> android/gradle.properties
-
-
-      - name: 🧹 Clean Gradle Cache
-        run: |
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/wrapper/
-          rm -rf android/.gradle/
-          echo "✅ Cleaned Gradle cache"
 
       - name: 🔐 Decode Keystore
         env:
@@ -114,7 +50,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease --stacktrace --no-daemon -Dkotlin.compiler.execution.strategy=in-process -Pkotlin.compiler.execution.strategy=in-process --warning-mode=none
+          ./gradlew bundleRelease --stacktrace --no-daemon
         timeout-minutes: 30
 
       - name: 📝 Setup Google Play Credentials
