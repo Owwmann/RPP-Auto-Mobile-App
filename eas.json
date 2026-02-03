@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 5.0.0",
+    "version": ">= 7.0.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -11,7 +11,7 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleDebug"
       },
-      "node": "22.11.0"
+      "node": "18.18.0"
     },
     "preview": {
       "distribution": "internal",
@@ -19,7 +19,7 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       },
-      "node": "22.11.0"
+      "node": "18.18.0"
     },
     "production": {
       "distribution": "internal",
@@ -27,7 +27,7 @@
         "buildType": "app-bundle",
         "gradleCommand": ":app:assembleRelease"
       },
-      "node": "22.11.0"
+      "node": "18.18.0"
     }
   },
   "submit": {
