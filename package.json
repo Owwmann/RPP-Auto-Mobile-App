@@ -11,7 +11,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "type-check": "tsc --noEmit",
-    "comment": "Flipper is automatically excluded in production builds"
+    "comment": "Flipper is automatically excluded in production builds",
+    "postinstall": "node scripts/fix-expo-kotlin.js"
   },
   "dependencies": {
     "@react-native-community/geolocation": "^3.0.6",
