@@ -37,17 +37,6 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Inject Flipper Properties (Critical Fix)
-        run: |
-          echo "Injecting missing Flipper versions into gradle.properties..."
-          echo "FLIPPER_VERSION=0.182.0" >> android/gradle.properties
-          echo "FLIPPER_SOCKET_VERSION=0.182.0" >> android/gradle.properties
-          echo "FLIPPER_FRESCO_VERSION=2.5.0" >> android/gradle.properties
-
-          # Verification
-          echo "✅ Verified properties:"
-          tail -n 5 android/gradle.properties
-
       - name: 🔧 Fix settings.gradle for Expo
         run: |
           echo "Removing incompatible React Native CLI plugin..."
@@ -70,6 +59,11 @@ jobs:
           echo "✅ Patched settings.gradle for Expo SDK compatibility"
 
       - name: 🔨 Build Debug APK
+        env:
+          # Flipper Configuration (Injected via Env Vars to bypass Gradle Cache)
+          ORG_GRADLE_PROJECT_FLIPPER_VERSION: "0.182.0"
+          ORG_GRADLE_PROJECT_FLIPPER_SOCKET_VERSION: "0.182.0"
+          ORG_GRADLE_PROJECT_FLIPPER_FRESCO_VERSION: "2.5.0"
         run: |
           cd android
           chmod +x gradlew
