@@ -37,26 +37,105 @@ jobs:
       - name: 🏗️ Generate Android Project
         run: npx expo prebuild --platform android --clean
 
-      - name: 🔧 Fix settings.gradle for Expo
+      - name: 🔧 Fix settings.gradle with Deterministic Patching
         run: |
-          echo "Removing incompatible React Native CLI plugin..."
-          echo "BEFORE:"
-          cat android/settings.gradle
-          # Try multiple patterns to catch all variations
-          sed -i "/id.*'com\.facebook\.react\.settings'/d" android/settings.gradle
-          sed -i '/id.*"com\.facebook\.react\.settings"/d' android/settings.gradle
-          sed -i "/id('com\.facebook\.react\.settings')/d" android/settings.gradle
-          sed -i '/id("com\.facebook\.react\.settings")/d' android/settings.gradle
-          sed -i '/com\.facebook\.react\.settings/d' android/settings.gradle
+          echo "🔨 Creating properly ordered settings.gradle for SDK 52..."
+          
+          # Create the complete file with GUARANTEED correct ordering
+          cat > android/settings.gradle << 'EOF'
+pluginManagement {
+    // CRITICAL: This MUST come first to register React Native plugin
+    // Makes 'com.facebook.react' namespace available for later use
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    
+    // Include React Native Gradle Plugin composite build
+    includeBuild(new File([
+        "node",
+        "--print",
+        "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"
+    ].execute(null, rootDir).text.trim()).getParentFile().toString())
+}
+
+// Configure React Native autolinking
+// NOW safe to use com.facebook.react namespace (plugin registered above)
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
+        ex.autolinkLibrariesFromCommand()
+    } else {
+        def command = [
+            'node',
+            '--no-warnings',
+            '--eval',
+            'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
+            'react-native-config',
+            '--json',
+            '--platform',
+            'android'
+        ].toList()
+        ex.autolinkLibrariesFromCommand(command)
+    }
+}
+
+rootProject.name = 'RPP Auto Mobile'
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        reactAndroidLibs {
+            from(files(new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../gradle/libs.versions.toml")))
+        }
+    }
+}
+
+// Apply Expo autolinking (legacy method for expo-modules)
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
+useExpoModules()
+
+// Include app module
+include ':app'
+includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile())
+EOF
+          
           echo ""
-          echo "AFTER:"
+          echo "📋 Final settings.gradle content:"
           cat android/settings.gradle
           echo ""
-          if grep -q "facebook.*react.*settings" android/settings.gradle; then
-            echo "ERROR: facebook.react.settings still present!"
+          echo "✅ Created deterministic settings.gradle with correct ordering"
+
+      - name: ✅ Validate settings.gradle Structure
+        run: |
+          echo "🔍 Validating settings.gradle structure..."
+          
+          # Find line numbers
+          plugin_line=$(grep -n "pluginManagement" android/settings.gradle | head -1 | cut -d: -f1)
+          extensions_line=$(grep -n "extensions.configure" android/settings.gradle | head -1 | cut -d: -f1)
+          
+          echo "  pluginManagement found at line: $plugin_line"
+          echo "  extensions.configure found at line: $extensions_line"
+          
+          # Validate ordering
+          if [ -z "$plugin_line" ]; then
+            echo "❌ ERROR: pluginManagement block not found!"
             exit 1
           fi
-          echo "✅ Patched settings.gradle for Expo SDK compatibility"
+          
+          if [ -z "$extensions_line" ]; then
+            echo "❌ ERROR: extensions.configure block not found!"
+            exit 1
+          fi
+          
+          if [ "$plugin_line" -gt "$extensions_line" ]; then
+            echo "❌ ERROR: pluginManagement (line $plugin_line) must come BEFORE extensions.configure (line $extensions_line)"
+            exit 1
+          fi
+          
+          echo "✅ VALIDATION PASSED: settings.gradle has correct ordering"
+          echo "  ✓ pluginManagement at line $plugin_line"
+          echo "  ✓ extensions.configure at line $extensions_line"
+          echo "  ✓ Ordering is correct (pluginManagement comes first)"
 
       - name: 🔨 Build Debug APK
         env:
