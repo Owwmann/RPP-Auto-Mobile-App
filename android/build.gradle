@@ -44,4 +44,27 @@ allprojects {
         google()
         maven { url 'https://www.jitpack.io' }
     }
+
+    // CRITICAL FIX: Force Kotlin 1.9 language version for ALL modules
+    // This overrides hardcoded settings in expo-modules-core and other dependencies
+    afterEvaluate { project ->
+        // Configure Java compatibility for Android projects
+        if (project.hasProperty("android")) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
+        
+        // Force Kotlin 1.9 for ALL Kotlin compilation tasks (including expo-modules-core)
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+                languageVersion = "1.9"
+                apiVersion = "1.9"
+            }
+        }
+    }
 }
