@@ -27,7 +27,7 @@
     "expo-location": "~16.5.5",
     "expo-updates": "^0.27.5",
     "react": "18.3.1",
-    "react-native": "0.73.6",
+    "react-native": "0.76.6",
     "react-native-ble-plx": "^3.1.2",
     "react-native-dotenv": "^3.4.10",
     "react-native-maps": "1.10.0",
