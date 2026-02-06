@@ -1,4 +1,9 @@
 module.exports = {
+  extra: {
+    eas: {
+      projectId: "115183a2-3107-4dcd-bfee-b98a3dada7b4",
+    },
+  },
   name: "RPP Auto Mobile",
   slug: "rpp-auto-mobile",
   version: "1.0.0",
