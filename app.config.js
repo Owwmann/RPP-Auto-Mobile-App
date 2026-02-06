@@ -43,9 +43,13 @@ module.exports = {
   plugins: [
     "expo-build-properties"
   ],
-  extra: {
+  
+extra: {
     eas: {
-      projectId: "" // Add your EAS project ID here if using EAS Build
+      projectId: "115183a2-3107-4dcd-bfee-b98a3dada7b4"
     }
+  },
+  eas: {
+    projectId: "115183a2-3107-4dcd-bfee-b98a3dada7b4"
   }
 };
