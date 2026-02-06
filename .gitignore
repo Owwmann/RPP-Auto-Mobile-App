@@ -1,24 +1,35 @@
-# OSX
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
 .DS_Store
+*.pem
 
-# Node
-node_modules/
-npm-debug.log
-yarn-error.log
-
-# React Native
-/android/app/build
-/android/.gradle
-/ios/Pods/
-/ios/build
-
-# Environment
+# local env files
+.env*.local
 .env
-.env.local
 
-# IDE
-.vscode/
-.idea/
+# typescript
+*.tsbuildinfo
 
-# Test
-coverage/
+# Node.js
+node_modules/
+

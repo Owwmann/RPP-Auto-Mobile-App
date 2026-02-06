@@ -12,10 +12,10 @@ interface Message {
 
 const AIAssistantScreen: React.FC = () => {
   const {user} = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Array<Message>>([
     {
       id: '1',
-      text: 'Hello! I'm your RPP Auto AI Assistant. How can I help you today?',
+      text: 'Hello! I\'m your RPP Auto AI Assistant. How can I help you today?',
       sender: 'ai',
       timestamp: new Date(),
     },
@@ -42,7 +42,7 @@ const AIAssistantScreen: React.FC = () => {
     setTimeout(() => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'I received your message. I'm here to help with vehicle diagnostics, service booking, and parts recommendations!',
+        text: 'I received your message. I\'m here to help with vehicle diagnostics, service booking, and parts recommendations!',
         sender: 'ai',
         timestamp: new Date(),
       };

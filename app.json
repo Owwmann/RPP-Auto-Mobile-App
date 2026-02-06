@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "RPP Auto",
-    "slug": "rpp-auto-mobile-app",
-    "version": "1.0.0",
+    "slug": "rpp-auto",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.rppautomobile.app",
@@ -36,21 +36,26 @@
     },
     "plugins": [
       [
-        "expo-location",
+        "expo-build-properties",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow RPP Auto to use your location for nearby service centers."
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow RPP AUTO to access your camera for VIN scanning and damage documentation."
+          "android": {
+            "networkInspector": false,
+            "usesCleartextTraffic": false,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 24,
+            "buildToolsVersion": "34.0.0",
+            "kotlinVersion": "1.9.24",
+            "newArchEnabled": false
+          }
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "cf3d0f50-dd9c-4b74-8497-13ece606b11a"
+        "projectId": "5b717878-92a2-43d4-ab24-93501737a6ae"
       }
     },
     "owner": "brotherbey765"
