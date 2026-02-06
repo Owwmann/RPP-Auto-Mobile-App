@@ -1,6 +1,8 @@
 /**
- * AI Service
+ * AI Service - Enhanced with Real OpenRouter Integration
  * Integration with OpenRouter API (Claude 3.5)
+ * 
+ * BATCH E Implementation: Real AI Integration for RPP Auto App
  */
 
 import axios from 'axios';
@@ -13,13 +15,99 @@ interface AIRequest {
   agentType: string;
 }
 
+interface DiagnosisRequest {
+  symptoms: string[];
+  vehicleInfo?: {
+    make: string;
+    model: string;
+    year: number;
+  };
+  dtcCodes?: string[];
+}
+
+interface DiagnosisResponse {
+  diagnosis: string;
+  confidence: number;
+  recommendations: string[];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  estimatedCost?: {
+    min: number;
+    max: number;
+  };
+}
+
 class AIService {
-  private baseURL = API_CONFIG.OPENROUTER_BASE_URL;
-  private apiKey = API_CONFIG.OPENROUTER_API_KEY;
+  private baseURL = 'https://openrouter.ai/api/v1';
+  private apiKey = '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';
   private model = 'anthropic/claude-3.5-sonnet';
 
   /**
-   * Generate AI response
+   * BATCH E - Main Function: Fetch AI-Powered Diagnosis
+   * This function implements the core requirement from the PRD:
+   * "Implement a function `fetchDiagnosis(symptoms: string[])`"
+   */
+  async fetchDiagnosis(request: DiagnosisRequest): Promise<DiagnosisResponse> {
+    try {
+      const prompt = this.buildDiagnosticPrompt(request);
+
+      const response = await axios.post(
+        `${this.baseURL}/chat/completions`,
+        {
+          model: this.model,
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert automotive mechanic with over 20 years of experience. 
+              Analyze vehicle symptoms and diagnostic trouble codes (DTCs) to provide accurate diagnoses.
+              Always provide:
+              1. A clear diagnosis
+              2. Confidence score (0-100)
+              3. Recommended actions
+              4. Severity level (low/medium/high/critical)
+              5. Estimated repair cost range
+
+              Respond in JSON format with these exact fields:
+              {
+                "diagnosis": "detailed explanation",
+                "confidence": 85,
+                "recommendations": ["action 1", "action 2"],
+                "severity": "medium",
+                "estimatedCost": {"min": 100, "max": 500}
+              }`,
+            },
+            {role: 'user', content: prompt},
+          ],
+          max_tokens: 1000,
+          temperature: 0.7,
+          response_format: {type: 'json_object'},
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://rppauto.com',
+            'X-Title': 'RPP Auto - AI Diagnostics',
+          },
+        }
+      );
+
+      const result = JSON.parse(response.data.choices[0].message.content);
+      return result as DiagnosisResponse;
+    } catch (error: any) {
+      console.error('AI Diagnosis error:', error.response?.data || error.message);
+
+      // Fallback response
+      return {
+        diagnosis: 'Unable to generate diagnosis at this time. Please try again or consult a mechanic.',
+        confidence: 0,
+        recommendations: ['Visit a certified mechanic for proper diagnosis'],
+        severity: 'medium',
+      };
+    }
+  }
+
+  /**
+   * Generate AI response for general queries
    */
   async generateResponse(request: AIRequest): Promise<string> {
     try {
@@ -42,6 +130,8 @@ class AIService {
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://rppauto.com',
+            'X-Title': 'RPP Auto - AI Assistant',
           },
         }
       );
@@ -77,6 +167,7 @@ class AIService {
             {role: 'user', content: message},
           ],
           max_tokens: 50,
+          response_format: {type: 'json_object'},
         },
         {
           headers: {
@@ -92,6 +183,28 @@ class AIService {
       console.error('Intent recognition error:', error);
       return {intent: 'general', confidence: 0.5};
     }
+  }
+
+  private buildDiagnosticPrompt(request: DiagnosisRequest): string {
+    let prompt = `Analyze the following vehicle symptoms and provide a comprehensive diagnosis:\n\n`;
+
+    prompt += `Symptoms:\n`;
+    request.symptoms.forEach((symptom, index) => {
+      prompt += `${index + 1}. ${symptom}\n`;
+    });
+
+    if (request.vehicleInfo) {
+      prompt += `\nVehicle: ${request.vehicleInfo.year} ${request.vehicleInfo.make} ${request.vehicleInfo.model}`;
+    }
+
+    if (request.dtcCodes && request.dtcCodes.length > 0) {
+      prompt += `\n\nDiagnostic Trouble Codes (DTCs):\n`;
+      request.dtcCodes.forEach(code => {
+        prompt += `- ${code}\n`;
+      });
+    }
+
+    return prompt;
   }
 
   private getSystemPrompt(agentType: string): string {
