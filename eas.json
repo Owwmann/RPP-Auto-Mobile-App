@@ -1,42 +1,22 @@
 {
   "cli": {
-    "version": ">= 10.0.0",
-    "requireCommit": true
+    "version": ">= 5.9.1",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
       "android": {
-        "gradleCommand": ":app:assembleDebug",
-        "resourceClass": "medium",
-        "image": "latest"
-      },
-      "ios": {
-        "resourceClass": "medium",
-        "simulator": true,
-        "image": "latest"
-      },
-      "node": "20.10.0"
+        "gradleCommand": ":app:assembleDebug"
+      }
     },
     "preview": {
-      "distribution": "internal",
-      "extends": "production",
-      "channel": "preview"
+      "distribution": "internal"
     },
-    "production": {
-      "channel": "production",
-      "node": "20.10.0",
-      "android": {
-        "buildType": "app-bundle",
-        "resourceClass": "medium",
-        "image": "latest"
-      },
-      "ios": {
-        "resourceClass": "large",
-        "image": "latest"
-      }
-    }
+    "production": {}
+  },
+  "submit": {
+    "production": {}
   }
 }
