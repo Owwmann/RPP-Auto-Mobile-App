@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "RPP Auto",
-    "slug": "rpp-auto",
-    "version": "1.0.1",
+    "name": "RPP-Auto-Mobile-App",
+    "slug": "rpp-auto-mobile-app",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,24 +15,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.rppautomobile.app"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.rppautomobile.app",
-      "permissions": [
-        "CAMERA",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "BLUETOOTH",
-        "BLUETOOTH_ADMIN",
-        "BLUETOOTH_CONNECT",
-        "BLUETOOTH_SCAN"
-      ]
+      "package": "com.anonymous.RPPAutoMobileApp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -50,6 +43,10 @@
         }
       ]
     ],
-    "owner": "brotherbey765"
+    "extra": {
+      "eas": {
+       
+      }
+    }
   }
 }
