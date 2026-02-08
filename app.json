@@ -39,9 +39,6 @@
         "expo-build-properties",
         {
           "android": {
-            "networkInspector": false,
-            "usesCleartextTraffic": false,
-            "enableProguardInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true,
             "compileSdkVersion": 34,
             "targetSdkVersion": 34,
@@ -53,11 +50,6 @@
         }
       ]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "5b717878-92a2-43d4-ab24-93501737a6ae"
-      }
-    },
     "owner": "brotherbey765"
   }
 }
