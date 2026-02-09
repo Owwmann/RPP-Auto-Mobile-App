@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "RPP-Auto-Mobile-App",
+    "name": "RPP Auto",
     "slug": "rpp-auto-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,29 +21,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.anonymous.RPPAutoMobileApp"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "buildToolsVersion": "34.0.0",
-            "kotlinVersion": "1.9.24"
-          }
-        }
-      ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "cf3d0f50-dd9c-4b74-8497-13ece606b11a"
-      }
-    }
+      "expo-build-properties"
+    ]
   }
 }

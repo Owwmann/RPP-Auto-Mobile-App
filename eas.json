@@ -1,38 +1,38 @@
- {
-      "cli": {
-        "version": ">= 5.9.1",
-        "appVersionSource": "remote"
+{
+  "cli": {
+    "version": ">= 5.9.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "development"
       },
-      "build": {
-        "development": {
-          "developmentClient": true,
-          "distribution": "internal",
-          "env": {
-            "NODE_ENV": "development"
-          },
-          "android": {
-            "buildType": "apk"
-          }
-        },
-        "preview": {
-          "distribution": "internal",
-          "env": {
-            "NODE_ENV": "production"
-          },
-          "android": {
-            "buildType": "apk"
-          }
-        },
-        "production": {
-          "env": {
-            "NODE_ENV": "production"
-          },
-          "android": {
-            "buildType": "app-bundle"
-          }
-        }
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
       },
-      "submit": {
-        "production": {}
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
+  },
+  "submit": {
+    "production": {}
+  }
+}
