@@ -11,7 +11,7 @@
 
 - **App Name**: RPP Auto
 - **Expo Slug**: `rpp-auto-mobile-app`
-- **Owner**: `owwmann`
+- **Owner**: `lewisgray`
 - **Bundle ID (iOS)**: `com.recessionproofproducts.rppauto`
 - **Package Name (Android)**: `com.recessionproofproducts.rppauto`
 
@@ -41,7 +41,7 @@ expo login
 
 ```bash
 # Clone the repository (if not already)
-git clone https://github.com/Owwmann/RPP-Auto-Mobile-App.git
+git clone https://github.com/LewisGray/RPP-Auto-Mobile-App.git
 cd RPP-Auto-Mobile-App
 
 # Initialize Expo project (if not already linked)
@@ -58,8 +58,8 @@ eas build:configure
 3. Create new project or link existing project:
    - Project name: **RPP Auto**
    - Slug: **rpp-auto-mobile-app**
-   - Owner: **owwmann**
-4. Link GitHub repository: `Owwmann/RPP-Auto-Mobile-App`
+   - Owner: **lewisgray**
+4. Link GitHub repository: `LewisGray/RPP-Auto-Mobile-App`
 
 ### Step 5: Build Your App
 
@@ -86,8 +86,8 @@ eas submit --platform ios
 
 ## 🔗 Platform Links
 
-- **GitHub Repository**: https://github.com/Owwmann/RPP-Auto-Mobile-App
-- **Expo.dev Project**: https://expo.dev/@owwmann/rpp-auto-mobile-app
+- **GitHub Repository**: https://github.com/LewisGray/RPP-Auto-Mobile-App
+- **Expo.dev Project**: https://expo.dev/@lewisgray/rpp-auto-mobile-app
 - **Vercel Deployment**: https://recessionproofproducts.com
 - **Google Drive (Design Assets)**: https://drive.google.com/drive/folders/1xdJBzcCGpOuZMIBA1rw3PPweV5aoLbmp
 
@@ -139,7 +139,7 @@ All platforms are now synchronized:
 
 1. **Login to Expo.dev** using your API token
 2. **Create/Link Project** with slug: `rpp-auto-mobile-app`
-3. **Connect GitHub** repository: `Owwmann/RPP-Auto-Mobile-App`
+3. **Connect GitHub** repository: `LewisGray/RPP-Auto-Mobile-App`
 4. **Run First Build** using EAS CLI
 5. **Test on Device** using Expo Go app
 6. **Submit to Stores** when ready
@@ -149,7 +149,7 @@ All platforms are now synchronized:
 For issues or questions:
 - Expo Documentation: https://docs.expo.dev
 - EAS Build Docs: https://docs.expo.dev/build/introduction/
-- GitHub Issues: https://github.com/Owwmann/RPP-Auto-Mobile-App/issues
+- GitHub Issues: https://github.com/LewisGray/RPP-Auto-Mobile-App/issues
 
 ---
 

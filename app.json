@@ -40,12 +40,6 @@
           }
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "d6db2b06-2677-496c-af64-949de18528e2"
-      }
-    },
-    "owner": "brotherbey765"
+    ]
   }
 }
