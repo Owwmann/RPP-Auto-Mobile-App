@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "RPP Auto",
+    "name": "RPP-Auto-Mobile-App",
     "slug": "rpp-auto-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,25 +15,31 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lewisgray.rppautomobileapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lewisgray.rppautomobileapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-build-properties"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "d6db2b06-2677-496c-af64-949de18528e2"
-      }
-    },
-    "owner": "brotherbey765"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0",
+            "kotlinVersion": "1.9.24"
+          }
+        }
+      ]
+    ]
   }
 }
