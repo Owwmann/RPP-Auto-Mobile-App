@@ -1,84 +1,77 @@
 # RPP Auto Mobile App
-<div align="center">
-<img src="./assets/icon.png" alt="RPP Auto Logo" width="100" height="100" />
 
-**Professional Vehicle Diagnostic & Management Solution**
-
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://expo.dev)
-[![Platform](https://img.shields.io/badge/platform-android%20%7C%20ios-lightgrey)](https://reactnative.dev)
-[![Stack](https://img.shields.io/badge/stack-Expo%20SDK%2034-blue)](https://expo.dev)
-</div>
+**Owner:** Lewis Gray
+**Status:** Active Development
 
 ## Project Overview
-RPP Auto is a comprehensive mobile application designed for vehicle diagnostics, maintenance scheduling, and mechanic connection. It features an AI-powered diagnostic wizard, OBD2 scanner integration, and a community forum for automotive enthusiasts.
+RPP Auto is a comprehensive mobile application designed for vehicle diagnostics, maintenance scheduling, and mechanic connection.
 
-### Key Features
-* **AI Diagnostic Wizard:** Step-by-step symptom analysis.
-* **Vehicle Management:** Track maintenance, mileage, and service records.
-* **Mechanic Finder:** Geolocation-based service provider directory.
-* **Community Forum:** Interact with other users and experts.
+## Build Status
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://expo.dev)
+
+## Configuration
+*   **App Config:** `app.json` (Managed by Expo Prebuild)
+*   **Build Config:** `eas.json` (Managed by EAS CLI)
+*   **Assets:** Located in `/assets` folder.
+
+## How to Build
+1.  **Development (APK):**
+    ```bash
+    eas build --platform android --profile development
+    ```
+2.  **Production (AAB):**
+    ```bash
+    eas build --platform android --profile production
+    ```
+```
 
 ---
 
-## Configuration & Build Setup
-This project uses **Expo (EAS)** for building and **NPM** for dependency management.
+### 5. TERMINAL COMMANDS (The "Sync" Step)
+**This is the most important step.** This will take the files you just edited, plus your splash screen image, and push them to GitHub so Expo.dev can see them.
 
-### Prerequisites
-* Node.js (LTS)
-* NPM (Package Manager)
-* Expo CLI (`npm install -g eas-cli`)
+**Instructions:**
+1.  Open your **VS Code Terminal**.
+2.  Paste these commands **one block at a time**.
 
-### 1. Installation
-Clone the repository and install dependencies:
+**Block A: Create Assets from your Custom Splash Image**
+*(This assumes your custom image "01 - Splash Screen.png" is inside the assets folder. If it's not, move it there first).*
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/RPP-Auto-Mobile-App.git
-cd RPP-Auto-Mobile-App
-npm install
+# Navigate to assets
+cd assets
+
+# Create the 4 required icons by copying your custom splash image
+# (We rename it to exactly what app.json expects)
+cp "01 - Splash Screen.png" adaptive-icon.png
+cp "01 - Splash Screen.png" icon.png
+cp "01 - Splash Screen.png" splash.png
+cp "01 - Splash Screen.png" favicon.png
+
+# Go back to main folder
+cd ..
 ```
 
-### 2. Environment Setup
-The application requires specific configuration in `app.json` and `eas.json` to handle build types correctly.
-* **Source of Truth:** `app.json` handles the project identity.
-* **Build Profiles:** `eas.json` manages `development` (APK) and `production` (App Bundle) builds.
+**Block B: Sync with GitHub (Lewis Gray's Repo)**
+*(This forces the new config and assets up to the cloud)*
 
-### 3. Running the App (Local)
-Start the development server:
 ```bash
-npx expo start
+# Force add the assets (in case gitignore was blocking them)
+git add -f assets/icon.png assets/splash.png assets/adaptive-icon.png assets/favicon.png
+
+# Add the configuration file updates
+git add app.json eas.json package.json README.md
+
+# Commit the changes
+git commit -m "fix: Complete Project Sync for Lewis Gray - Config & Assets"
+
+# Push to GitHub
+git push origin main
 ```
 
-### 4. Building for Android (Cloud)
-To generate a build using EAS:
+**Block C: Run the Build**
+*(Run this ONLY after the push above completes successfully)*
 
-**Development Build (APK for testing):**
 ```bash
 eas build --platform android --profile development
-```
 
-**Production Build (AAB for Play Store):**
-```bash
-eas build --platform android --profile production
-```
-
----
-
-## Project Structure
-```text
-RPP-Auto-Mobile-App/
-├── assets/       # Critical build assets (Icons, Splash)
-├── components/   # Reusable UI components
-├── screens/      # Application screens (Diagnostic, Home, etc.)
-├── app.json      # Expo Configuration
-├── eas.json      # EAS Build Configuration
-└── package.json  # Dependencies (NPM)
-```
-
-## Contribution
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-*© 2026 RPP Auto. All Rights Reserved.*
