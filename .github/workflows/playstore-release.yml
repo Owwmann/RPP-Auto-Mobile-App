@@ -1,172 +1,41 @@
-name: Play Store Release Build
+name: EAS Build - Android Development
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build-release-aab:
-    name: Build Release AAB
+  build:
+    name: Build Android App
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-
+    
     steps:
-      - name: 🏗️ Checkout repository
+      - name: 🔍 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: 📱 Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: 20
+          cache: 'npm'
 
-      - name: 📦 Install Dependencies
-        run: |
-          npm cache clean --force || true
-          rm -rf node_modules
-          npm install --force
+      - name: 📦 Install dependencies
+        run: npm ci
 
-      - name: 🏗️ Generate Android Project
-        run: npx expo prebuild --platform android --clean
-
-      - name: 🔧 Fix settings.gradle with Deterministic Patching
-        run: |
-          echo "🔨 Creating properly ordered settings.gradle for SDK 52..."
-          
-          # Create the complete file with GUARANTEED correct ordering
-          cat > android/settings.gradle << 'EOF'
-pluginManagement {
-    // CRITICAL: This MUST come first to register React Native plugin
-    // Makes 'com.facebook.react' namespace available for later use
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    
-    // Include React Native Gradle Plugin composite build
-    includeBuild(new File([
-        "node",
-        "--print",
-        "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"
-    ].execute(null, rootDir).text.trim()).getParentFile().toString())
-}
-
-// Configure React Native autolinking
-// NOW safe to use com.facebook.react namespace (plugin registered above)
-extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-    if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
-        ex.autolinkLibrariesFromCommand()
-    } else {
-        def command = [
-            'node',
-            '--no-warnings',
-            '--eval',
-            'require(require.resolve(\'expo-modules-autolinking\', { paths: [require.resolve(\'expo/package.json\')] }))(process.argv.slice(1))',
-            'react-native-config',
-            '--json',
-            '--platform',
-            'android'
-        ].toList()
-        ex.autolinkLibrariesFromCommand(command)
-    }
-}
-
-rootProject.name = 'RPP Auto Mobile'
-
-dependencyResolutionManagement {
-    versionCatalogs {
-        reactAndroidLibs {
-            from(files(new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../gradle/libs.versions.toml")))
-        }
-    }
-}
-
-// Apply Expo autolinking (legacy method for expo-modules)
-apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle");
-useExpoModules()
-
-// Include app module
-include ':app'
-includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile())
-EOF
-          
-          echo ""
-          echo "📋 Final settings.gradle content:"
-          cat android/settings.gradle
-          echo ""
-          echo "✅ Created deterministic settings.gradle with correct ordering"
-
-      - name: ✅ Validate settings.gradle Structure
-        run: |
-          echo "🔍 Validating settings.gradle structure..."
-          
-          # Find line numbers
-          plugin_line=$(grep -n "pluginManagement" android/settings.gradle | head -1 | cut -d: -f1)
-          extensions_line=$(grep -n "extensions.configure" android/settings.gradle | head -1 | cut -d: -f1)
-          
-          echo "  pluginManagement found at line: $plugin_line"
-          echo "  extensions.configure found at line: $extensions_line"
-          
-          # Validate ordering
-          if [ -z "$plugin_line" ]; then
-            echo "❌ ERROR: pluginManagement block not found!"
-            exit 1
-          fi
-          
-          if [ -z "$extensions_line" ]; then
-            echo "❌ ERROR: extensions.configure block not found!"
-            exit 1
-          fi
-          
-          if [ "$plugin_line" -gt "$extensions_line" ]; then
-            echo "❌ ERROR: pluginManagement (line $plugin_line) must come BEFORE extensions.configure (line $extensions_line)"
-            exit 1
-          fi
-          
-          echo "✅ VALIDATION PASSED: settings.gradle has correct ordering"
-          echo "  ✓ pluginManagement at line $plugin_line"
-          echo "  ✓ extensions.configure at line $extensions_line"
-          echo "  ✓ Ordering is correct (pluginManagement comes first)"
-
-      - name: 🔐 Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-
-      - name: 🔨 Build Release AAB
-        env:
-          # Flipper Configuration (Injected via Env Vars to bypass Gradle Cache)
-          ORG_GRADLE_PROJECT_FLIPPER_VERSION: "0.182.0"
-          ORG_GRADLE_PROJECT_FLIPPER_SOCKET_VERSION: "0.182.0"
-          ORG_GRADLE_PROJECT_FLIPPER_FRESCO_VERSION: "2.5.0"
-          # Existing Keystore Secrets (DO NOT REMOVE)
-          ORG_GRADLE_PROJECT_storeFile: upload-keystore.jks
-          ORG_GRADLE_PROJECT_storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_keyAlias: ${{ secrets.KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_keyPassword: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew bundleRelease --stacktrace --no-daemon
-        timeout-minutes: 30
-
-      - name: 📝 Setup Google Play Credentials
-        run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > service-account.json
-
-      - name: 🚀 Upload to Play Store
-        uses: r0adkll/upload-google-play@v1
+      - name: 🔧 Setup Expo and EAS
+        uses: expo/expo-github-action@v8
         with:
-          serviceAccountJson: service-account.json
-          packageName: com.rppauto.mobileapp
-          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          status: draft
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🏗️ Build Android (Development)
+        run: |
+          eas build --platform android --profile development --non-interactive --no-wait
+
+      - name: ✅ Build submitted
+        run: echo "Build submitted to EAS. Check https://expo.dev/accounts/lewisgray/projects/rpp-auto-mobile-app/builds"
