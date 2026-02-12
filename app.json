@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "RPP Auto",
-    "slug": "rpp-auto-mobile-app",
+    "name": "RPP-Auto-Mobile-App",
+    "slug": "rpp-auto-mobile-app-lewis",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -23,36 +23,21 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.lewisgray.rppautomobileapp",
-      "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+      "package": "com.lewisgray.rppautomobileapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "buildToolsVersion": "34.0.0",
-            "kotlinVersion": "1.9.24"
-          }
-        }
-      ]
+      "expo-router"
     ],
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "10630840-7381-7032-1385-1"
+        "projectId": "9ef1ca1c-810c-4767-a2df-9b5e58236545"
       }
-    },
-    "owner": "lewisgray1947"
+    }
   }
 }
