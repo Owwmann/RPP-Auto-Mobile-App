@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -23,12 +23,19 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.lewisgray.rppautomobileapp"
+      "package": "com.lewisgray.rppautomobileapp",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
+      "expo-router",
       [
         "expo-build-properties",
         {
@@ -43,7 +50,9 @@
     ],
     "extra": {
       "eas": {
+        "projectId": "10630840-7381-7032-1385-1"
       }
-    }
+    },
+    "owner": "lewisgray1947"
   }
 }
