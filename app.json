@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RPP Auto",
-    "slug": "rpp-auto",
+    "slug": "rpp-auto-mobile-app-lewis",
     "version": "2.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -51,10 +51,14 @@
     },
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "9ef1ca1c-810c-4767-a2df-9b5e58236545"
       },
       "supabaseUrl": "https://gfhthbmbgoxqqbzxnauv.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmaHRoYm1iZ294cXFienhuYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzExMjQsImV4cCI6MjA3NTA0NzEyNH0.7cFIaTcDupirdhkHlMgcm7eEUfRMwroVGn1QH4wqwz4"
-    }
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmaHRoYm1iZ294cXFienhuYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzExMjQsImV4cCI6MjA3NTA0NzEyNH0.7cFIaTcDupirdhkHlMgcm7eEUfRMwroVGn1QH4wqwz4",
+      "router": {
+        "origin": false
+      }
+    },
+    "owner": "brotherbey765"
   }
 }
