@@ -1,14 +1,23 @@
 {
   "cli": {
-    "version": ">= 5.9.1",
-    "appVersionSource": "remote"
+    "version": ">= 16.0.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://gfhthbmbgoxqqbzxnauv.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmaHRoYm1iZ294cXFienhuYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzExMjQsImV4cCI6MjA3NTA0NzEyNH0.7cFIaTcDupirdhkHlMgcm7eEUfRMwroVGn1QH4wqwz4",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51SDzvvPdkY0ufZAnTfNoJFLmhsPgM7JWwdThsh2NSHflhugE0LEh6xsyif6BeA47ZRmZ1Wwa0v0rc4QFCbsshSDr006tFyvmk2",
+        "EXPO_PUBLIC_OPENROUTER_API_KEY": "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",
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyBP32CIk3aifHzyoRSED24WGn6yGFLYkvE",
+        "EXPO_PUBLIC_MOTOR_DAAS_PUBLIC_KEY": "NQfWGktRwx",
+        "EXPO_PUBLIC_AUTO_DEV_API_KEY": "sk_ad_9d1LuT8P96kph5A46qXAz-C3"
       }
     },
     "preview": {
