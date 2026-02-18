@@ -2,63 +2,15 @@
   "expo": {
     "name": "RPP Auto",
     "slug": "rpp-auto-mobile-app-lewis",
-    "version": "2.0.4",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "rppauto",
-    "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.rppauto.app"
-    },
+    "owner": "brotherbey765",
+    "version": "1.0.0",
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000000"
-      },
-      "package": "com.rppauto.app",
-      "versionCode": 4,
-      "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "CAMERA",
-        "BLUETOOTH",
-        "BLUETOOTH_ADMIN",
-        "BLUETOOTH_CONNECT",
-        "BLUETOOTH_SCAN",
-        "INTERNET",
-        "ACCESS_NETWORK_STATE"
-      ]
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true
+      "package": "com.brotherbey765.rppauto"
     },
     "extra": {
       "eas": {
         "projectId": "9ef1ca1c-810c-4767-a2df-9b5e58236545"
-      },
-      "supabaseUrl": "https://gfhthbmbgoxqqbzxnauv.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmaHRoYm1iZ294cXFienhuYXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0NzExMjQsImV4cCI6MjA3NTA0NzEyNH0.7cFIaTcDupirdhkHlMgcm7eEUfRMwroVGn1QH4wqwz4",
-      "router": {
-        "origin": false
       }
-    },
-    "owner": "brotherbey765"
+    }
   }
 }
