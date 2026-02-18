@@ -42,3 +42,4 @@ node_modules/
 expo-env.d.ts
 # @end expo-clinul
 *.backup.*
+nul
