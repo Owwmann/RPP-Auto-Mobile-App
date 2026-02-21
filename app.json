@@ -7,7 +7,7 @@
     "android": {
       "package": "com.brotherbey765.rppauto",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/37-adaptive-icon.webp",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
       }
     },
@@ -27,14 +27,14 @@
       "expo-build-properties",
       "expo-router"
     ],
-    "icon": "./assets/images/37-adaptive-icon.webp",
+    "icon": "./assets/images/icon.png",
     "splash": {
-      "image": "./assets/images/01-splash-screen.webp",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
     "web": {
-      "favicon": "./assets/images/38-favicon.webp"
+      "favicon": "./assets/images/favicon.png"
     }
   }
 }
