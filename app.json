@@ -5,12 +5,36 @@
     "owner": "brotherbey765",
     "version": "1.0.0",
     "android": {
-      "package": "com.brotherbey765.rppauto"
+      "package": "com.brotherbey765.rppauto",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/37-adaptive-icon.webp",
+        "backgroundColor": "#000000"
+      }
     },
     "extra": {
       "eas": {
         "projectId": "9ef1ca1c-810c-4767-a2df-9b5e58236545"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9ef1ca1c-810c-4767-a2df-9b5e58236545"
+    },
+    "ios": {},
+    "plugins": [
+      "expo-build-properties",
+      "expo-router"
+    ],
+    "icon": "./assets/images/37-adaptive-icon.webp",
+    "splash": {
+      "image": "./assets/images/01-splash-screen.webp",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "web": {
+      "favicon": "./assets/images/38-favicon.webp"
     }
   }
 }
